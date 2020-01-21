@@ -14,8 +14,8 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 
 minecraft {
-    version = "14.23.0.2486"
-    mappings = "snapshot_20170625"
+    version = "1.12.2-14.23.0.2486"
+    mappings = "stable_39"
     runDir = "run"
 
     coreMod = "squeek.quakemovement.ASMPlugin"
