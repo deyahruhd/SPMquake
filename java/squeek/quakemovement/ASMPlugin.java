@@ -5,7 +5,6 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
 import java.util.Map;
@@ -18,6 +17,9 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 	private static String CLASS_ENTITY = "net.minecraft.entity.Entity";
 	private static String CLASS_QUAKE_CLIENT_PLAYER = "squeek.quakemovement.QuakeClientPlayer";
 	private static String CLASS_QUAKE_SERVER_PLAYER = "squeek.quakemovement.QuakeServerPlayer";
+
+	private static String CLASS_NET_HANDLER_PLAY_CLIENT = "net.minecraft.client.network.NetHandlerPlayClient";
+	private static String CLASS_PACKETENTITYVEL = "net.minecraft.client.play.server.SPacketEntityVelocity";
 
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes)
@@ -89,6 +91,20 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 			loadParameters.add(new VarInsnNode(Opcodes.FLOAD, 4));
 			injectStandardHook(method, findFirstInstruction(method), CLASS_QUAKE_CLIENT_PLAYER, "moveRelativeBase", toMethodDescriptor("Z", CLASS_ENTITY, "F", "F", "F", "F"), loadParameters);
 
+			return writeClassToBytes(classNode);
+		} else if (transformedName.equals(CLASS_NET_HANDLER_PLAY_CLIENT))
+		{
+			ClassNode classNode = readClassFromBytes(bytes);
+			MethodNode method;
+
+			method = findMethodNodeOfClass(classNode, isObfuscated ? "a" : "handleEntityVelocity", "(Lnet/minecraft/network/play/server/SPacketEntityVelocity;)V");
+			if (method == null)
+				throw new RuntimeException("could not find NetHandlerPlayClient.handleEntityVelocity");
+
+			AbstractInsnNode setVel = findLastInstructionWithOpcode (method, Opcodes.INVOKEVIRTUAL);
+
+			method.instructions.insertBefore(setVel, new MethodInsnNode(Opcodes.INVOKEVIRTUAL, toInternalClassName(CLASS_ENTITY), isObfuscated ? "g" : "addVelocity", "(DDD)V", false));
+			method.instructions.remove (setVel);
 			return writeClassToBytes(classNode);
 		}
 		return bytes;
