@@ -103,8 +103,17 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 
 			AbstractInsnNode setVel = findLastInstructionWithOpcode (method, Opcodes.INVOKEVIRTUAL);
 
-			method.instructions.insertBefore(setVel, new MethodInsnNode(Opcodes.INVOKEVIRTUAL, toInternalClassName(CLASS_ENTITY), isObfuscated ? "g" : "addVelocity", "(DDD)V", false));
+			method.instructions.insertBefore(setVel, new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_QUAKE_CLIENT_PLAYER), "setEntityVelocity", "(Lnet/minecraft/entity/Entity;DDD)V", false));
 			method.instructions.remove (setVel);
+
+			MethodNode method2;
+
+			method2 = findMethodNodeOfClass(classNode, isObfuscated ? "a" : "handleExplosion", "(Lnet/minecraft/network/play/server/SPacketExplosion;)V");
+			if (method2 == null)
+				throw new RuntimeException("could not find NetHandlerPlayClient.handleExplosion");
+
+			method2.instructions.insertBefore(method2.instructions.getFirst(), new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_QUAKE_CLIENT_PLAYER), "updateAirborneTimer", "()V", false));
+
 			return writeClassToBytes(classNode);
 		}
 		return bytes;

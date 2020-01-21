@@ -6,16 +6,21 @@ import java.util.*;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketThreadUtil;
+import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
@@ -28,6 +33,10 @@ public class QuakeClientPlayer
 
 	private static Method setDidJumpThisTick = null;
 	private static Method setIsJumping = null;
+
+	private static boolean playerDamaged = true;
+	private static Vec3d playerVelBeforeDmg = Vec3d.ZERO;
+	private static long playerAirbornTime = 0;
 
 	static
 	{
@@ -190,8 +199,15 @@ public class QuakeClientPlayer
 
 	private static float getSlipperiness(EntityPlayer player)
 	{
-		float f2 = 0.91F;
-		if (player.onGround)
+		long time = System.currentTimeMillis ();
+
+		float f2 = 1.00F;
+
+		// The second condition replicates a mechanic in CPMA known as plasma ground boosting - using plasma
+		// near you, right before you land on the ground, grants you a 50-200ms period of 0 friction. This can
+		// allow doubling or even tripling your speed with a well timed and quick circle jump.
+		// For now it's activated when receiving knockback from an explosion
+		if (player.onGround && (time - playerAirbornTime > 250))
 		{
 			BlockPos groundPos = new BlockPos(MathHelper.floor(player.posX), MathHelper.floor(player.getEntityBoundingBox().minY) - 1, MathHelper.floor(player.posZ));
 			Block ground = player.world.getBlockState(groundPos).getBlock();
@@ -276,6 +292,16 @@ public class QuakeClientPlayer
 		catch(Exception e)
 		{
 			return false;
+		}
+	}
+
+	public static void updateAirborneTimer () {
+		playerAirbornTime = System.currentTimeMillis();
+	}
+
+	public static void setEntityVelocity(Entity entity, double x, double y, double z) {
+		if ((x * x + y * y + z * z) > 0) {
+			entity.setVelocity (x, y, z);
 		}
 	}
 
@@ -485,8 +511,6 @@ public class QuakeClientPlayer
 					// alter based on the surface friction
 					sv_accelerate *= minecraft_getMoveSpeed(player) * 2.15F / wishspeed;
 
-					System.out.println (minecraft_getMoveSpeed (player));
-
 					quake_Accelerate(player, wishspeed, wishdir[0], wishdir[1], sv_accelerate);
 				}
 
@@ -670,59 +694,6 @@ public class QuakeClientPlayer
 		// Adjust pmove vel.
 		player.motionX += accelspeed * wishX;
 		player.motionZ += accelspeed * wishZ;
-	}
-
-	@SuppressWarnings("unused")
-	private static void quake_Friction(EntityPlayer player)
-	{
-		double speed, newspeed, control;
-		float friction;
-		float drop;
-
-		// Calculate speed
-		speed = getSpeed(player);
-
-		// If too slow, return
-		if (speed <= 0.0F)
-		{
-			return;
-		}
-
-		drop = 0.0F;
-
-		// convars
-		float sv_friction = 1.0F;
-		float sv_stopspeed = 0.005F;
-
-		float surfaceFriction = getSurfaceFriction(player);
-		friction = sv_friction * surfaceFriction;
-
-		// Bleed off some speed, but if we have less than the bleed
-		//  threshold, bleed the threshold amount.
-		control = (speed < sv_stopspeed) ? sv_stopspeed : speed;
-
-		// Add the amount to the drop amount.
-		drop += control * friction * 0.05F;
-
-		// scale the velocity
-		newspeed = speed - drop;
-		if (newspeed < 0.0F)
-			newspeed = 0.0F;
-
-		if (newspeed != speed)
-		{
-			// Determine proportion of old speed we are using.
-			newspeed /= speed;
-			// Adjust velocity according to proportion.
-			player.motionX *= newspeed;
-			player.motionZ *= newspeed;
-		}
-	}
-
-	@SuppressWarnings("unused")
-	private static void quake_OnLivingUpdate()
-	{
-		didJumpThisTick = false;
 	}
 
 	/* =================================================
