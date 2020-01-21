@@ -34,9 +34,13 @@ public class QuakeClientPlayer
 	private static Method setDidJumpThisTick = null;
 	private static Method setIsJumping = null;
 
-	private static boolean playerDamaged = true;
-	private static Vec3d playerVelBeforeDmg = Vec3d.ZERO;
-	private static long playerAirbornTime = 0;
+	// PGB
+	private static long playerAirbornTime 		 = 0;
+
+	// Wall clipping
+	private static boolean playerWasTouchingWall = false;
+	private static long playerWallTouchTime 	 = 0;
+	private static Vec3d playerJumpVel 			 = Vec3d.ZERO;
 
 	static
 	{
@@ -531,6 +535,21 @@ public class QuakeClientPlayer
 				double sv_airaccelerate = ModConfig.AIR_ACCELERATE;
 				quake_AirAccelerate(player, wishspeed, wishdir[0], wishdir[1], sv_airaccelerate);
 			}
+
+			if (onGroundForReal)
+				playerJumpVel = Vec3d.ZERO;
+
+			if (getSpeed (player) > 0.21540 && (System.currentTimeMillis () - playerWallTouchTime > 400) && player.onGround && ! playerWasTouchingWall) {
+				playerWallTouchTime = System.currentTimeMillis ();
+				playerJumpVel = new Vec3d (player.motionX, 0.0, player.motionZ);
+			}
+
+			if ((System.currentTimeMillis () - playerWallTouchTime <= 400) && ! player.collidedHorizontally && playerWasTouchingWall && playerJumpVel.length() > 0.21540) {
+				player.setVelocity (playerJumpVel.x, player.motionY, playerJumpVel.z);
+				playerWallTouchTime = 0;
+			}
+
+			playerWasTouchingWall = player.collidedHorizontally;
 
 			// apply velocity
 			player.move(MoverType.SELF, player.motionX, player.motionY, player.motionZ);
