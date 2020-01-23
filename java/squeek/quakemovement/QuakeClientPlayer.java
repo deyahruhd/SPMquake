@@ -536,8 +536,7 @@ public class QuakeClientPlayer
 			// air movement
 			else
 			{
-				double sv_airaccelerate = ModConfig.AIR_ACCELERATE;
-				quake_AirAccelerate(player, wishspeed, wishdir[0], wishdir[1], sv_airaccelerate);
+				quake_AirAccelerate(player, wishspeed, wishdir[0], wishdir[1], sidemove != 0.f, forwardmove != 0.f);
 			}
 
 			if (onGroundForReal)
@@ -632,7 +631,7 @@ public class QuakeClientPlayer
 		else
 		{
 			if (curspeed > 0.098)
-				quake_AirAccelerate(player, wishspeed, wishdir[0], wishdir[1], ModConfig.ACCELERATE);
+				quake_AirAccelerate(player, wishspeed, wishdir[0], wishdir[1], sidemove != 0.f, forwardmove != 0.f);
 			else
 				quake_Accelerate(player, .0980F, wishdir[0], wishdir[1], ModConfig.ACCELERATE);
 
@@ -686,12 +685,18 @@ public class QuakeClientPlayer
 		player.motionZ += accelspeed * wishZ;
 	}
 
-	private static void quake_AirAccelerate(EntityPlayer player, float wishspeed, double wishX, double wishZ, double accel)
+	private static void quake_AirAccelerate(EntityPlayer player, float wishspeed, double wishX, double wishZ, boolean strafe, boolean forward)
 	{
 		double addspeed, accelspeed, currentspeed;
 
 		float wishspd = wishspeed;
-		float maxAirAcceleration = (float) ModConfig.MAX_AIR_ACCEL_PER_TICK;
+
+		float dynamicAccel = (float) ModConfig.Q3_AIR_ACCELERATE;
+		float maxAirAcceleration = (float) ModConfig.Q3_MAX_AIR_ACCEL_PER_TICK;
+		if (strafe && !forward) {
+			dynamicAccel = (float) ModConfig.Q1_AIR_ACCELERATE;
+			maxAirAcceleration = (float) ModConfig.Q1_MAX_AIR_ACCEL_PER_TICK;
+		}
 
 		if (wishspd > maxAirAcceleration)
 			wishspd = maxAirAcceleration;
@@ -708,7 +713,7 @@ public class QuakeClientPlayer
 			return;
 
 		// Determine acceleration speed after acceleration
-		accelspeed = accel * wishspeed * 0.05F;
+		accelspeed = dynamicAccel * wishspeed * 0.05F;
 
 		// Cap it
 		if (accelspeed > addspeed)
