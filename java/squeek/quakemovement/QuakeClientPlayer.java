@@ -434,40 +434,6 @@ public class QuakeClientPlayer
 		}
 	}
 
-	public static void minecraft_moveEntityWithHeading(EntityPlayer player, float sidemove, float upmove, float forwardmove)
-	{
-		// take care of water and lava movement using default code
-		if ((player.isInWater() && !player.capabilities.isFlying)
-				|| (player.isInLava() && !player.capabilities.isFlying))
-		{
-			player.travel(sidemove, upmove, forwardmove);
-		}
-		else
-		{
-			// get friction
-			float momentumRetention = getSlipperiness(player);
-
-			// alter motionX/motionZ based on desired movement
-			player.moveRelative(sidemove, upmove, forwardmove, minecraft_getMoveSpeed(player));
-
-			// make adjustments for ladder interaction
-			minecraft_ApplyLadderPhysics(player);
-
-			// do the movement
-			player.move(MoverType.SELF, player.motionX, player.motionY, player.motionZ);
-
-			// climb ladder here for some reason
-			minecraft_ClimbLadder(player);
-
-			// gravity + friction
-			minecraft_ApplyGravity(player);
-			minecraft_ApplyFriction(player, momentumRetention);
-
-			// swing them arms
-			minecraft_SwingLimbsBasedOnMovement(player);
-		}
-	}
-
 	/* =================================================
 	 * END MINECRAFT PHYSICS
 	 * =================================================
@@ -565,97 +531,6 @@ public class QuakeClientPlayer
 		minecraft_SwingLimbsBasedOnMovement(player);
 
 		return true;
-	}
-
-	private static void quake_ApplyWaterFriction(EntityPlayer player, double friction)
-	{
-		player.motionX *= friction;
-		player.motionY *= friction;
-		player.motionZ *= friction;
-
-		/*
-		float speed = (float)(player.getSpeed());
-		float newspeed = 0.0F;
-		if (speed != 0.0F)
-		{
-			newspeed = speed - 0.05F * speed * friction; //* player->m_surfaceFriction;
-
-			float mult = newspeed/speed;
-			player.motionX *= mult;
-			player.motionY *= mult;
-			player.motionZ *= mult;
-		}
-
-		return newspeed;
-		*/
-
-		/*
-		// slow in water
-		player.motionX *= 0.800000011920929D;
-		player.motionY *= 0.800000011920929D;
-		player.motionZ *= 0.800000011920929D;
-		*/
-	}
-
-	@SuppressWarnings("unused")
-	private static void quake_WaterAccelerate(EntityPlayer player, float wishspeed, float speed, double wishX, double wishZ, double accel)
-	{
-		float addspeed = wishspeed - speed;
-		if (addspeed > 0)
-		{
-			float accelspeed = (float) (accel * wishspeed * 0.05F);
-			if (accelspeed > addspeed)
-			{
-				accelspeed = addspeed;
-			}
-
-			player.motionX += accelspeed * wishX;
-			player.motionZ += accelspeed * wishZ;
-		}
-	}
-
-	private static void quake_WaterMove(EntityPlayer player, float sidemove, float upmove, float forwardmove)
-	{
-		double lastPosY = player.posY;
-
-		// get all relevant movement values
-		float wishspeed = (sidemove != 0.0F || forwardmove != 0.0F) ? quake_getMaxMoveSpeed(player) : 0.0F;
-		float[] wishdir = getMovementDirection(player, sidemove, forwardmove);
-		boolean isSharking = isJumping(player) && player.isOffsetPositionInLiquid(0.0D, 1.0D, 0.0D);
-		double curspeed = getSpeed(player);
-
-		if (!isSharking || curspeed < 0.078F)
-		{
-			minecraft_WaterMove(player, sidemove, upmove, forwardmove);
-		}
-		else
-		{
-			if (curspeed > 0.098)
-				quake_AirAccelerate(player, wishspeed, wishdir[0], wishdir[1], sidemove != 0.f, forwardmove != 0.f);
-			else
-				quake_Accelerate(player, .0980F, wishdir[0], wishdir[1], ModConfig.ACCELERATE);
-
-			player.move(MoverType.SELF, player.motionX, player.motionY, player.motionZ);
-
-			player.motionY = 0.0D;
-		}
-
-		// water jump
-		if (player.collidedHorizontally && player.isOffsetPositionInLiquid(player.motionX, player.motionY + 0.6000000238418579D - player.posY + lastPosY, player.motionZ))
-		{
-			player.motionY = 0.30000001192092896D;
-		}
-
-		if (!baseVelocities.isEmpty())
-		{
-			float speedMod = wishspeed / quake_getMaxMoveSpeed(player);
-			// add in base velocities
-			for (float[] baseVel : baseVelocities)
-			{
-				player.motionX += baseVel[0] * speedMod;
-				player.motionZ += baseVel[1] * speedMod;
-			}
-		}
 	}
 
 	private static void quake_Accelerate(EntityPlayer player, float wishspeed, double wishX, double wishZ, double accel)
