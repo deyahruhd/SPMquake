@@ -66,6 +66,8 @@ public class QuakeClientPlayer
 		if (!ModConfig.ENABLED)
 			return false;
 
+		player.setSprinting (false);
+
 		boolean didQuakeMovement;
 		double d0 = player.posX;
 		double d1 = player.posY;
