@@ -216,7 +216,11 @@ public class QuakeClientPlayer
 			BlockPos groundPos = new BlockPos(MathHelper.floor(player.posX), MathHelper.floor(player.getEntityBoundingBox().minY) - 1, MathHelper.floor(player.posZ));
 			Block ground = player.world.getBlockState(groundPos).getBlock();
 
-			f2 = ground.slipperiness * 0.91F;
+			if (ground.slipperiness < 1.0) {
+				float curvedSlip = MathHelper.clamp(1.f + (float) Math.pow(ground.slipperiness - 1, 5), 0.f, 1.f);
+
+				f2 = ground.slipperiness * 0.91F;
+			}
 		}
 		return f2;
 	}
@@ -513,7 +517,7 @@ public class QuakeClientPlayer
 				if (wishspeed != 0.0F)
 				{
 					// alter based on the surface friction
-					sv_accelerate *= minecraft_getMoveSpeed(player) * 2.15F / wishspeed;
+					//sv_accelerate *= minecraft_getMoveSpeed(player) * 2.15F;
 
 					quake_Accelerate(player, wishspeed, wishdir[0], wishdir[1], sv_accelerate);
 				}
