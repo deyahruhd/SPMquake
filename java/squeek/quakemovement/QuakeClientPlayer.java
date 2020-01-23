@@ -38,9 +38,8 @@ public class QuakeClientPlayer
 	private static long playerAirbornTime 		 = 0;
 
 	// Wall clipping
-	private static boolean playerWasTouchingWall = false;
-	private static long playerWallTouchTime 	 = 0;
-	private static Vec3d playerJumpVel 			 = Vec3d.ZERO;
+	private static boolean playerGroundTouch  = false;
+	private static long playerGroundTouchTime = 0;
 
 	static
 	{
@@ -505,23 +504,16 @@ public class QuakeClientPlayer
 				quake_AirAccelerate(player, wishspeed, wishdir[0], wishdir[1], sidemove != 0.f, forwardmove != 0.f);
 			}
 
-			if (onGroundForReal)
-				playerJumpVel = Vec3d.ZERO;
+			if (getSpeed (player) > 0.21540 && (System.currentTimeMillis () - playerGroundTouchTime > 400) && player.onGround)
+				playerGroundTouchTime = System.currentTimeMillis ();
 
-			if (getSpeed (player) > 0.21540 && (System.currentTimeMillis () - playerWallTouchTime > 400) && player.onGround && ! playerWasTouchingWall) {
-				playerWallTouchTime = System.currentTimeMillis ();
-				playerJumpVel = new Vec3d (player.motionX, 0.0, player.motionZ);
-			}
-
-			if ((System.currentTimeMillis () - playerWallTouchTime <= 400) && ! player.collidedHorizontally && playerWasTouchingWall && playerJumpVel.length() > 0.21540) {
-				player.setVelocity (playerJumpVel.x, player.motionY, playerJumpVel.z);
-				playerWallTouchTime = 0;
-			}
-
-			playerWasTouchingWall = player.collidedHorizontally;
+			Vec3d previousVel = new Vec3d (player.motionX, player.motionY, player.motionZ);
 
 			// apply velocity
 			player.move(MoverType.SELF, player.motionX, player.motionY, player.motionZ);
+
+			if ((System.currentTimeMillis () - playerGroundTouchTime <= 400) && player.collidedHorizontally)
+				player.setVelocity (previousVel.x, previousVel.y, previousVel.z);
 
 			// HL2 code applies half gravity before acceleration and half after acceleration, but this seems to work fine
 			minecraft_ApplyGravity(player);
