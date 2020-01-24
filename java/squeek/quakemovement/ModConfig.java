@@ -17,7 +17,7 @@ public class ModConfig
 
 	public static double Q1_AIR_ACCELERATE;
 	private static final String Q1_AIR_ACCELERATE_NAME = "q1airAccelerate";
-	private static final double Q1_AIR_ACCELERATE_DEFAULT = 30.0D;
+	private static final double Q1_AIR_ACCELERATE_DEFAULT = 6.0D;
 
 	public static double Q3_AIR_ACCELERATE;
 	private static final String Q3_AIR_ACCELERATE_NAME = "q3airAccelerate";
@@ -29,7 +29,7 @@ public class ModConfig
 
 	public static double Q1_MAX_AIR_ACCEL_PER_TICK;
 	private static final String Q1_MAX_AIR_ACCEL_PER_TICK_NAME = "q1maxAirAccelerationPerTick";
-	private static final double Q1_MAX_AIR_ACCEL_PER_TICK_DEFAULT = 0.0045D;
+	private static final double Q1_MAX_AIR_ACCEL_PER_TICK_DEFAULT = 0.1D;
 
 	public static double Q3_MAX_AIR_ACCEL_PER_TICK;
 	private static final String Q3_MAX_AIR_ACCEL_PER_TICK_NAME = "q3maxAirAccelerationPerTick";

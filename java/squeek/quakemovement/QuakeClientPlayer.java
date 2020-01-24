@@ -37,6 +37,9 @@ public class QuakeClientPlayer
 	// Wall clipping
 	private static long playerGroundTouchTime = 0;
 
+	// Sliding
+	private static float playerSlide 		  = -1.f;
+
 	static
 	{
 		try
@@ -440,29 +443,40 @@ public class QuakeClientPlayer
 			boolean onGroundForReal = player.onGround && !isJumping(player);
 			float momentumRetention = getSlipperiness(player);
 
+			double sv_accelerate = ModConfig.ACCELERATE;
+
 			// ground movement
 			if (onGroundForReal)
 			{
-				// apply friction before acceleration so we can accelerate back up to maxspeed afterwards
-				//quake_Friction(); // buggy because material-based friction uses a totally different format
+				float dynamicCap = -1.0f;
+				if (player.isSneaking () && getSpeed (player) > 0.21540) {
+					if (playerSlide < 0.f)
+						playerSlide = 0.999f;
+					wishspeed *= 3.50f;
+					sv_accelerate = 3000.0D;
+					momentumRetention = 0.99f;
+					dynamicCap = (float) getSpeed (player) * (1.f - (playerSlide - 1.f) * (playerSlide - 1.f));
+					playerSlide = Math.max (playerSlide - 0.01f, 0.f);
+				} else {
+					playerSlide = -1.f;
+				}
 				minecraft_ApplyFriction(player, momentumRetention);
 
-				double sv_accelerate = ModConfig.ACCELERATE;
-
-				if (wishspeed != 0.0F)
-				{
-					// alter based on the surface friction
-					//sv_accelerate *= minecraft_getMoveSpeed(player) * 2.15F;
-
-					quake_Accelerate(player, wishspeed, wishdir[0], wishdir[1], sv_accelerate);
-				}
+				if (wishspeed == 0.f && dynamicCap > 0.f) {
+					Vec3d hardCappedVel = new Vec3d (player.motionX, 0.0, player.motionZ).normalize().scale (dynamicCap);
+					player.motionX = hardCappedVel.x;
+					player.motionZ = hardCappedVel.z;
+				} else
+					quake_Accelerate(player, wishspeed, dynamicCap, wishdir[0], wishdir[1], sv_accelerate);
 
 				// Force reset so people can't store their velocities while on the ground
 				playerGroundTouchTime = 0;
+
 			}
 			// air movement
 			else
 			{
+				playerSlide = -1.f;
 				quake_AirAccelerate(player, wishspeed, wishdir[0], wishdir[1], sidemove != 0.f, forwardmove != 0.f);
 			}
 
@@ -487,7 +501,7 @@ public class QuakeClientPlayer
 		return true;
 	}
 
-	private static void quake_Accelerate(EntityPlayer player, float wishspeed, double wishX, double wishZ, double accel)
+	private static void quake_Accelerate(EntityPlayer player, float wishspeed, float cap, double wishX, double wishZ, double accel)
 	{
 		double addspeed, accelspeed, currentspeed;
 
@@ -512,6 +526,12 @@ public class QuakeClientPlayer
 		// Adjust pmove vel.
 		player.motionX += accelspeed * wishX;
 		player.motionZ += accelspeed * wishZ;
+
+		if (cap > 0.f && (player.motionX * player.motionX + player.motionZ * player.motionZ) > (cap * cap)) {
+			Vec3d hardCappedVel = new Vec3d (player.motionX, 0.0, player.motionZ).normalize().scale (cap);
+			player.motionX = hardCappedVel.x;
+			player.motionZ = hardCappedVel.z;
+		}
 	}
 
 	private static void quake_AirAccelerate(EntityPlayer player, float wishspeed, double wishX, double wishZ, boolean strafe, boolean forward)
