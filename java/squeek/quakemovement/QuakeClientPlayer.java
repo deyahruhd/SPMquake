@@ -456,6 +456,9 @@ public class QuakeClientPlayer
 
 					quake_Accelerate(player, wishspeed, wishdir[0], wishdir[1], sv_accelerate);
 				}
+
+				// Force reset so people can't store their velocities while on the ground
+				playerGroundTouchTime = 0;
 			}
 			// air movement
 			else
@@ -463,7 +466,7 @@ public class QuakeClientPlayer
 				quake_AirAccelerate(player, wishspeed, wishdir[0], wishdir[1], sidemove != 0.f, forwardmove != 0.f);
 			}
 
-			if (getSpeed (player) > 0.21540 && (System.currentTimeMillis () - playerGroundTouchTime > 400) && player.onGround)
+			if (getSpeed (player) > 0.21540 && (System.currentTimeMillis () - playerGroundTouchTime > 400) && player.onGround && ! onGroundForReal)
 				playerGroundTouchTime = System.currentTimeMillis ();
 
 			Vec3d previousVel = new Vec3d (player.motionX, player.motionY, player.motionZ);
