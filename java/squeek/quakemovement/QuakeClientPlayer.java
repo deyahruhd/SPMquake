@@ -28,17 +28,13 @@ public class QuakeClientPlayer
 {
 	private static Random random = new Random();
 
-	private static boolean didJumpThisTick = false;
-	private static List<float[]> baseVelocities = new ArrayList<float[]>();
-
 	private static Method setDidJumpThisTick = null;
 	private static Method setIsJumping = null;
 
 	// PGB
-	private static long playerAirbornTime 		 = 0;
+	private static long playerAirbornTime     = 0;
 
 	// Wall clipping
-	private static boolean playerGroundTouch  = false;
 	private static long playerGroundTouchTime = 0;
 
 	static
@@ -89,7 +85,6 @@ public class QuakeClientPlayer
 		if (!player.world.isRemote)
 			return;
 
-		didJumpThisTick = false;
 		if (setDidJumpThisTick != null)
 		{
 			try
@@ -99,11 +94,6 @@ public class QuakeClientPlayer
 			catch (Exception e)
 			{
 			}
-		}
-
-		if (!baseVelocities.isEmpty())
-		{
-			baseVelocities.clear();
 		}
 
 		if (setIsJumping != null)
@@ -139,13 +129,6 @@ public class QuakeClientPlayer
 			return false;
 		}
 
-		// this is probably wrong, but its what was there in 1.10.2
-		float wishspeed = friction;
-		wishspeed *= 2.15f;
-		float[] wishdir = getMovementDirection(player, sidemove, forwardmove);
-		float[] wishvel = new float[]{wishdir[0] * wishspeed, wishdir[1] * wishspeed};
-		baseVelocities.add(wishvel);
-
 		return true;
 	}
 
@@ -165,7 +148,6 @@ public class QuakeClientPlayer
 			player.motionZ -= MathHelper.cos(f) * 0.2F;
 		}
 
-		didJumpThisTick = true;
 		if (setDidJumpThisTick != null)
 		{
 			try
@@ -186,20 +168,6 @@ public class QuakeClientPlayer
 	private static double getSpeed(EntityPlayer player)
 	{
 		return MathHelper.sqrt(player.motionX * player.motionX + player.motionZ * player.motionZ);
-	}
-
-	private static float getSurfaceFriction(EntityPlayer player)
-	{
-		float f2 = 1.0F;
-
-		if (player.onGround)
-		{
-			BlockPos groundPos = new BlockPos(MathHelper.floor(player.posX), MathHelper.floor(player.getEntityBoundingBox().minY) - 1, MathHelper.floor(player.posZ));
-			Block ground = player.world.getBlockState(groundPos).getBlock();
-			f2 = 1.0F - ground.slipperiness;
-		}
-
-		return f2;
 	}
 
 	private static float getSlipperiness(EntityPlayer player)
@@ -487,17 +455,6 @@ public class QuakeClientPlayer
 					//sv_accelerate *= minecraft_getMoveSpeed(player) * 2.15F;
 
 					quake_Accelerate(player, wishspeed, wishdir[0], wishdir[1], sv_accelerate);
-				}
-
-				if (!baseVelocities.isEmpty())
-				{
-					float speedMod = wishspeed / quake_getMaxMoveSpeed(player);
-					// add in base velocities
-					for (float[] baseVel : baseVelocities)
-					{
-						player.motionX += baseVel[0] * speedMod;
-						player.motionZ += baseVel[1] * speedMod;
-					}
 				}
 			}
 			// air movement
