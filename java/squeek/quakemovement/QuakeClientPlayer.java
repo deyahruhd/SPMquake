@@ -62,10 +62,9 @@ public class QuakeClientPlayer
 		if (!player.world.isRemote)
 			return false;
 
-		if (!ModConfig.ENABLED)
+		if (! ModQuakeMovement.shouldDoQuakeMovement (player))
 			return false;
 
-		player.setSprinting (false);
 
 		boolean didQuakeMovement;
 		double d0 = player.posX;
@@ -74,8 +73,10 @@ public class QuakeClientPlayer
 
 		if ((player.capabilities.isFlying || player.isElytraFlying()) && player.getRidingEntity() == null)
 			return false;
-		else
+		else {
+			player.setSprinting (false);
 			didQuakeMovement = quake_moveEntityWithHeading(player, sidemove, upmove, forwardmove);
+		}
 
 		if (didQuakeMovement)
 			player.addMovementStat(player.posX - d0, player.posY - d1, player.posZ - d2);

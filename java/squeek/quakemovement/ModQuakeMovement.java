@@ -46,4 +46,8 @@ public class ModQuakeMovement
 			event.setDistance((float) (event.getDistance() - ModConfig.INCREASED_FALL_DISTANCE));
 		}
 	}
+
+	public static boolean shouldDoQuakeMovement (EntityPlayer player) {
+		return ModConfig.ENABLED;
+	}
 }
