@@ -6,6 +6,8 @@ import java.util.*;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -20,6 +22,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.Explosion;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
@@ -276,7 +279,29 @@ public class QuakeClientPlayer
 		}
 	}
 
-	public static void updateAirborneTimer () {
+	public static void affectSPPlayerByExplosion (Explosion e, float str) {
+		EntityPlayerSP player = Minecraft.getMinecraft().player;
+		Vec3d ePos = e.getPosition ();
+		float sqDist = (float) player.getDistanceSq (ePos.x, ePos.y, ePos.z);
+		if (sqDist <= (str * str)) {
+			float normalizedDist = MathHelper.sqrt (sqDist) / str;
+			Vec3d diff = ePos.subtract (new Vec3d (player.posX, player.posY, player.posZ)).normalize();
+
+			boolean specialCondition = false;
+
+			if (specialCondition) {
+				normalizedDist = 1.f - (float) Math.pow (normalizedDist, 4); // Curved accordingly
+				normalizedDist *= -0.5f;
+			} else {
+				normalizedDist = 1.f - (float) Math.pow (normalizedDist, 2); // Curved accordingly
+				normalizedDist *= -0.25f;
+			}
+
+			diff = diff.scale (str * normalizedDist);
+
+			player.addVelocity (diff.x, diff.y, diff.z);
+
+		}
 		playerAirbornTime = System.currentTimeMillis();
 	}
 

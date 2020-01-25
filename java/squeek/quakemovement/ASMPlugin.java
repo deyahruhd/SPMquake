@@ -17,9 +17,8 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 	private static String CLASS_ENTITY = "net.minecraft.entity.Entity";
 	private static String CLASS_QUAKE_CLIENT_PLAYER = "squeek.quakemovement.QuakeClientPlayer";
 	private static String CLASS_QUAKE_SERVER_PLAYER = "squeek.quakemovement.QuakeServerPlayer";
-
 	private static String CLASS_NET_HANDLER_PLAY_CLIENT = "net.minecraft.client.network.NetHandlerPlayClient";
-	private static String CLASS_PACKETENTITYVEL = "net.minecraft.client.play.server.SPacketEntityVelocity";
+	private static String CLASS_SPACKET_EXPLOSION = "net.minecraft.network.play.server.SPacketExplosion";
 
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes)
@@ -112,7 +111,18 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 			if (method2 == null)
 				throw new RuntimeException("could not find NetHandlerPlayClient.handleExplosion");
 
-			method2.instructions.insertBefore(method2.instructions.getFirst(), new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_QUAKE_CLIENT_PLAYER), "updateAirborneTimer", "()V", false));
+			AbstractInsnNode doExplosionB =
+					getOrFindInstructionWithOpcode (getOrFindInstructionWithOpcode (method2.instructions.getLast (), Opcodes.INVOKESPECIAL, true),
+													Opcodes.INVOKEVIRTUAL, false);
+
+			InsnList loadParameters = new InsnList();
+			loadParameters.add(new VarInsnNode(Opcodes.ALOAD, 2));
+			loadParameters.add(new VarInsnNode(Opcodes.ALOAD, 1));
+			loadParameters.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, toInternalClassName(CLASS_SPACKET_EXPLOSION), isObfuscated ? "i" : "getStrength", "()F", false));
+			loadParameters.add(new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_QUAKE_CLIENT_PLAYER), "affectSPPlayerByExplosion", "(Lnet/minecraft/world/Explosion;F)V", false));
+			loadParameters.add(new InsnNode(Opcodes.RETURN));
+
+			method.instructions.insertBefore (doExplosionB, loadParameters);
 
 			return writeClassToBytes(classNode);
 		}
