@@ -29,7 +29,7 @@ public class ModConfig
 
 	public static double Q1_MAX_AIR_ACCEL_PER_TICK;
 	private static final String Q1_MAX_AIR_ACCEL_PER_TICK_NAME = "q1maxAirAccelerationPerTick";
-	private static final double Q1_MAX_AIR_ACCEL_PER_TICK_DEFAULT = 0.1D;
+	private static final double Q1_MAX_AIR_ACCEL_PER_TICK_DEFAULT = 0.05D;
 
 	public static double Q3_MAX_AIR_ACCEL_PER_TICK;
 	private static final String Q3_MAX_AIR_ACCEL_PER_TICK_NAME = "q3maxAirAccelerationPerTick";
@@ -39,6 +39,11 @@ public class ModConfig
 	private static Property ENABLED_PROPERTY;
 	private static final String ENABLED_NAME = "enabled";
 	private static final boolean ENABLED_DEFAULT = true;
+
+	public static boolean JUMP_INDICATORS_ENABLED;
+	private static Property JUMP_INDICATORS_ENABLED_PROPERTY;
+	private static final String JUMP_INDICATORS_ENABLED_NAME = "jumpIndicatorsEnabled";
+	private static final boolean JUMP_INDICATORS_ENABLED_DEFAULT = true;
 
 	public static Configuration config;
 
@@ -61,8 +66,10 @@ public class ModConfig
 
 		INCREASED_FALL_DISTANCE = (float) (config.get(CATEGORY_MOVEMENT, INCREASED_FALL_DISTANCE_NAME, INCREASED_FALL_DISTANCE_DEFAULT, "increases the distance needed to fall in order to take fall damage; this is a server-side setting").getDouble(INCREASED_FALL_DISTANCE_DEFAULT));
 
-		ENABLED_PROPERTY = config.get(CATEGORY_MOVEMENT, ENABLED_NAME, ENABLED_DEFAULT, "turns off/on the quake-style movement for the client (essentially the saved value of the ingame toggle keybind)");
+		ENABLED_PROPERTY = config.get(CATEGORY_MOVEMENT, ENABLED_NAME, ENABLED_DEFAULT, "turns off/on the quake-style movement for the client");
 		ENABLED = ENABLED_PROPERTY.getBoolean(ENABLED_DEFAULT);
+		JUMP_INDICATORS_ENABLED_PROPERTY = config.get(CATEGORY_MOVEMENT, JUMP_INDICATORS_ENABLED_NAME, JUMP_INDICATORS_ENABLED_DEFAULT, "enables the on-screen jump press HUD elements");
+		JUMP_INDICATORS_ENABLED = JUMP_INDICATORS_ENABLED_PROPERTY.getBoolean(JUMP_INDICATORS_ENABLED_DEFAULT);
 
 		save();
 	}
