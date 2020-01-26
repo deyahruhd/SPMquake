@@ -18,7 +18,7 @@ minecraft {
     mappings = "stable_39"
     runDir = "run"
 
-    coreMod = "squeek.quakemovement.ASMPlugin"
+    coreMod = "squeek.quakemovement.asm.ASMPlugin"
 
     replace "\${version}", project.version
     replaceIn "ModInfo.java"
@@ -32,7 +32,7 @@ sourceSets.main.resources.srcDirs += 'resources'
 
 jar {
     manifest {
-        attributes 'FMLCorePlugin': 'squeek.quakemovement.ASMPlugin'
+        attributes 'FMLCorePlugin': 'squeek.quakemovement.asm.ASMPlugin'
         attributes 'FMLCorePluginContainsFMLMod': 'true'
     }
 }

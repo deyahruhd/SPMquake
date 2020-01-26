@@ -1,4 +1,4 @@
-package squeek.quakemovement;
+package squeek.quakemovement.handler;
 
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
@@ -11,6 +11,8 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
+import squeek.quakemovement.ModInfo;
+import squeek.quakemovement.config.ModConfig;
 
 @SideOnly(Side.CLIENT)
 public class ToggleKeyHandler

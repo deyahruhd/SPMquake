@@ -1,4 +1,4 @@
-package squeek.quakemovement;
+package squeek.quakemovement.asm;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
@@ -19,8 +19,8 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 	private static String CLASS_NET_HANDLER_PLAY_CLIENT = "net.minecraft.client.network.NetHandlerPlayClient";
 	private static String CLASS_SPACKET_EXPLOSION 		= "net.minecraft.network.play.server.SPacketExplosion";
 
-	private static String CLASS_QUAKE_CLIENT_PLAYER 	= "squeek.quakemovement.QuakeClientPlayer";
-	private static String CLASS_QUAKE_SERVER_PLAYER 	= "squeek.quakemovement.QuakeServerPlayer";
+	private static String CLASS_QUAKE_CLIENT_PLAYER 	= "squeek.quakemovement.moveimpl.QuakeClientPlayer";
+	private static String CLASS_QUAKE_SERVER_PLAYER 	= "squeek.quakemovement.moveimpl.QuakeServerPlayer";
 
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes)

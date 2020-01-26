@@ -1,4 +1,4 @@
-package squeek.quakemovement;
+package squeek.quakemovement.moveimpl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -8,24 +8,20 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.PacketThreadUtil;
-import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.FoodStats;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import squeek.quakemovement.ModQuakeMovement;
+import squeek.quakemovement.config.ModConfig;
 
 public class QuakeClientPlayer
 {

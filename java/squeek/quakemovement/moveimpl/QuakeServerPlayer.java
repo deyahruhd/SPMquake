@@ -1,4 +1,4 @@
-package squeek.quakemovement;
+package squeek.quakemovement.moveimpl;
 
 import net.minecraft.entity.player.EntityPlayer;
 
