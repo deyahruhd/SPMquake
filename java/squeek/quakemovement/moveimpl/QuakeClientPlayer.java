@@ -126,7 +126,7 @@ public class QuakeClientPlayer
 		if (!player.world.isRemote)
 			return false;
 
-		if (!ModConfig.ENABLED)
+		if (!ModQuakeMovement.shouldDoQuakeMovement (player))
 			return false;
 
 		if ((player.capabilities.isFlying && player.getRidingEntity() == null) || player.isInWater() || player.isInLava() || player.isOnLadder())
@@ -142,7 +142,7 @@ public class QuakeClientPlayer
 		if (!player.world.isRemote)
 			return;
 
-		if (!ModConfig.ENABLED)
+		if (!ModQuakeMovement.shouldDoQuakeMovement (player))
 			return;
 
 		// undo this dumb thing
@@ -304,11 +304,9 @@ public class QuakeClientPlayer
 	}
 
 	public static void applyJumpVelToEntity (EntityLivingBase e, double speed) {
-		if (! e.world.isRemote)
+		if (! (e instanceof EntityPlayer) || (e instanceof EntityPlayer && ! ModQuakeMovement.shouldDoQuakeMovement ((EntityPlayer) e)))
 			e.motionY = speed;
 		else {
-			System.out.println("Jump: " + playerActualVelY);
-
 			if (playerActualVelY >= 0.0)
 				e.motionY = (Math.ceil (playerActualVelY / speed) * speed) + speed;
 			else
@@ -486,7 +484,7 @@ public class QuakeClientPlayer
 			boolean onGroundForReal = player.onGround && !isJumping(player);
 			float momentumRetention = getSlipperiness(player);
 
-			double sv_accelerate = ModConfig.ACCELERATE;
+			double sv_accelerate = ModConfig.VALUES.ACCELERATE;
 
 			// ground movement
 			if (onGroundForReal)
@@ -586,11 +584,11 @@ public class QuakeClientPlayer
 
 		float wishspd = wishspeed;
 
-		float dynamicAccel = (float) ModConfig.Q3_AIR_ACCELERATE;
-		float maxAirAcceleration = (float) ModConfig.Q3_MAX_AIR_ACCEL_PER_TICK;
+		float dynamicAccel = (float) ModConfig.VALUES.Q3_AIR_ACCELERATE;
+		float maxAirAcceleration = (float) ModConfig.VALUES.Q3_MAX_AIR_ACCEL_PER_TICK;
 		if (strafe && !forward) {
-			dynamicAccel = (float) ModConfig.Q1_AIR_ACCELERATE;
-			maxAirAcceleration = (float) ModConfig.Q1_MAX_AIR_ACCEL_PER_TICK;
+			dynamicAccel = (float) ModConfig.VALUES.Q1_AIR_ACCELERATE;
+			maxAirAcceleration = (float) ModConfig.VALUES.Q1_MAX_AIR_ACCEL_PER_TICK;
 		}
 
 		if (wishspd > maxAirAcceleration)
