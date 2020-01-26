@@ -317,9 +317,13 @@ public class QuakeClientPlayer
 	}
 
 	public static void setEntityVelocity(Entity entity, double x, double y, double z) {
-		if ((x * x + y * y + z * z) > 0) {
+		if (entity instanceof EntityPlayerSP) {
+			double speed = getSpeed ((EntityPlayer) entity);
+			double scale = 1.0 / ((speed + 1.0) * (speed + 1.0));
+
+			entity.addVelocity(x * scale, y * scale, z * scale);
+		} else
 			entity.setVelocity (x, y, z);
-		}
 	}
 
 	/* =================================================
