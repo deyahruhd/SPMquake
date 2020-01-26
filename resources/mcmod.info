@@ -1,13 +1,13 @@
 [
 {
-  "modid": "squake",
-  "name": "Squake",
-  "description": "Quake-style movement in Minecraft.",
+  "modid": "spmquake",
+  "name": "SPMquake",
+  "description": "An Squake fork bringing CPM-flavored air movement and trickjumping to Minecraft.",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",
-  "authorList": ["squeek"],
+  "authorList": ["squeek", "deyahruhd"],
   "credits": "",
   "logoFile": "",
   "screenshots": [],
