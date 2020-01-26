@@ -43,6 +43,9 @@ public class QuakeClientPlayer
 	// Sliding
 	private static float playerSlide 		  = -1.f;
 
+	// Ramp jump
+	private static double playerActualVelY    = 0.0;
+
 	static
 	{
 		try
@@ -67,7 +70,6 @@ public class QuakeClientPlayer
 
 		if (! ModQuakeMovement.shouldDoQuakeMovement (player))
 			return false;
-
 
 		boolean didQuakeMovement;
 		double d0 = player.posX;
@@ -279,7 +281,7 @@ public class QuakeClientPlayer
 		}
 	}
 
-	public static void affectSPPlayerByExplosion (Explosion e, float str) {
+	public static void applyExplosionToSPPlayer (Explosion e, float str) {
 		EntityPlayerSP player = Minecraft.getMinecraft().player;
 		Vec3d ePos = e.getPosition ();
 		float sqDist = (float) player.getDistanceSq (ePos.x, ePos.y, ePos.z);
@@ -303,6 +305,21 @@ public class QuakeClientPlayer
 
 		}
 		playerAirbornTime = System.currentTimeMillis();
+	}
+
+	public static void applyJumpVelToEntity (EntityLivingBase e, double speed) {
+		if (! e.world.isRemote)
+			e.motionY = speed;
+		else {
+			System.out.println("Jump: " + playerActualVelY);
+
+			if (playerActualVelY >= 0.0)
+				e.motionY = (Math.ceil (playerActualVelY / speed) * speed) + speed;
+			else
+				e.motionY = speed;
+
+			playerActualVelY = e.motionY;
+		}
 	}
 
 	public static void setEntityVelocity(Entity entity, double x, double y, double z) {
@@ -333,15 +350,19 @@ public class QuakeClientPlayer
 			{
 				player.motionY = 0.0D;
 			}
+
+			playerActualVelY = player.motionY;
 		}
 		else
 		{
 			// gravity
 			player.motionY -= 0.08D;
+			playerActualVelY -= 0.08D;
 		}
 
 		// air resistance
-		player.motionY *= 0.9800000190734863D;
+		player.motionY   *= 0.9800000190734863D;
+		playerActualVelY *= 0.9800000190734863D;
 	}
 
 	private static void minecraft_ApplyFriction(EntityPlayer player, float momentumRetention)
@@ -474,6 +495,7 @@ public class QuakeClientPlayer
 			// ground movement
 			if (onGroundForReal)
 			{
+				playerActualVelY = 0.0;
 				float dynamicCap = -1.0f;
 				if (player.isSneaking () && getSpeed (player) > 0.21540) {
 					if (playerSlide < 0.f)
@@ -514,8 +536,10 @@ public class QuakeClientPlayer
 			// apply velocity
 			player.move(MoverType.SELF, player.motionX, player.motionY, player.motionZ);
 
-			if ((System.currentTimeMillis () - playerGroundTouchTime <= 400) && player.collidedHorizontally)
-				player.setVelocity (previousVel.x, previousVel.y, previousVel.z);
+			if ((System.currentTimeMillis () - playerGroundTouchTime <= 400)) {
+				if (player.collidedHorizontally)
+					player.setVelocity(previousVel.x, playerActualVelY, previousVel.z);
+			}
 
 			// HL2 code applies half gravity before acceleration and half after acceleration, but this seems to work fine
 			minecraft_ApplyGravity(player);

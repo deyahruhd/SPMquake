@@ -13,12 +13,14 @@ import java.util.Map;
 public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 {
 	public static boolean isObfuscated = false;
-	private static String CLASS_ENTITY_PLAYER = "net.minecraft.entity.player.EntityPlayer";
-	private static String CLASS_ENTITY = "net.minecraft.entity.Entity";
-	private static String CLASS_QUAKE_CLIENT_PLAYER = "squeek.quakemovement.QuakeClientPlayer";
-	private static String CLASS_QUAKE_SERVER_PLAYER = "squeek.quakemovement.QuakeServerPlayer";
+	private static String CLASS_ENTITY_PLAYER      		= "net.minecraft.entity.player.EntityPlayer";
+	private static String CLASS_ENTITY_LIVING_BASE 		= "net.minecraft.entity.EntityLivingBase";
+	private static String CLASS_ENTITY 			   		= "net.minecraft.entity.Entity";
 	private static String CLASS_NET_HANDLER_PLAY_CLIENT = "net.minecraft.client.network.NetHandlerPlayClient";
-	private static String CLASS_SPACKET_EXPLOSION = "net.minecraft.network.play.server.SPacketExplosion";
+	private static String CLASS_SPACKET_EXPLOSION 		= "net.minecraft.network.play.server.SPacketExplosion";
+
+	private static String CLASS_QUAKE_CLIENT_PLAYER 	= "squeek.quakemovement.QuakeClientPlayer";
+	private static String CLASS_QUAKE_SERVER_PLAYER 	= "squeek.quakemovement.QuakeServerPlayer";
 
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes)
@@ -91,7 +93,8 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 			injectStandardHook(method, findFirstInstruction(method), CLASS_QUAKE_CLIENT_PLAYER, "moveRelativeBase", toMethodDescriptor("Z", CLASS_ENTITY, "F", "F", "F", "F"), loadParameters);
 
 			return writeClassToBytes(classNode);
-		} else if (transformedName.equals(CLASS_NET_HANDLER_PLAY_CLIENT))
+		}
+		else if (transformedName.equals(CLASS_NET_HANDLER_PLAY_CLIENT))
 		{
 			ClassNode classNode = readClassFromBytes(bytes);
 			MethodNode method;
@@ -119,10 +122,31 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 			loadParameters.add(new VarInsnNode(Opcodes.ALOAD, 2));
 			loadParameters.add(new VarInsnNode(Opcodes.ALOAD, 1));
 			loadParameters.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, toInternalClassName(CLASS_SPACKET_EXPLOSION), isObfuscated ? "i" : "getStrength", "()F", false));
-			loadParameters.add(new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_QUAKE_CLIENT_PLAYER), "affectSPPlayerByExplosion", "(Lnet/minecraft/world/Explosion;F)V", false));
+			loadParameters.add(new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_QUAKE_CLIENT_PLAYER), "applyExplosionToSPPlayer", "(Lnet/minecraft/world/Explosion;F)V", false));
 			loadParameters.add(new InsnNode(Opcodes.RETURN));
 
 			method.instructions.insertBefore (doExplosionB, loadParameters);
+
+			return writeClassToBytes(classNode);
+		}
+		else if (transformedName.equals(CLASS_ENTITY_LIVING_BASE))
+		{
+			ClassNode classNode = readClassFromBytes(bytes);
+			MethodNode method;
+
+			method = findMethodNodeOfClass(classNode, isObfuscated ? "aZ" : "jump", "()V");
+			if (method == null)
+				throw new RuntimeException("could not find EntityLivingBase.jump");
+
+			AbstractInsnNode putField = getOrFindInstructionWithOpcode (method.instructions.getFirst (), Opcodes.PUTFIELD, false);
+			AbstractInsnNode jumpTo = putField.getNext ();
+			assert (jumpTo instanceof LabelNode);
+
+			InsnList loadParameters = new InsnList();
+			loadParameters.add(new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_QUAKE_CLIENT_PLAYER), "applyJumpVelToEntity", "(Lnet/minecraft/entity/EntityLivingBase;D)V", false));
+			loadParameters.add(new JumpInsnNode (Opcodes.GOTO, (LabelNode) jumpTo));
+
+			method.instructions.insertBefore (putField, loadParameters);
 
 			return writeClassToBytes(classNode);
 		}
