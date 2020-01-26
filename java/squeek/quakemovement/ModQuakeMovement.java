@@ -69,30 +69,23 @@ public class ModQuakeMovement
 		Minecraft.getMinecraft ().getTextureManager().bindTexture(JUMP_INDICATORS);
 		GlStateManager.enableAlpha ();
 
-		int jumpMod = 0;
-		int sneakMod = 0;
-
-		if (Minecraft.getMinecraft ().gameSettings.keyBindForward.isKeyDown ()) {
+		if (Minecraft.getMinecraft ().gameSettings.keyBindForward.isKeyDown ())
 			drawTexturedModalRect(l / 2 - 7, i1 / 2 - 7 - 16, 0, 0, 16, 16);
-			jumpMod = 5;
-		}
 
 		if (Minecraft.getMinecraft ().gameSettings.keyBindLeft.isKeyDown ())
 			drawTexturedModalRect (l / 2 - 7 - 16, i1 / 2 - 7, 16, 0, 16, 16);
 
-		if (Minecraft.getMinecraft ().gameSettings.keyBindBack.isKeyDown ()) {
+		if (Minecraft.getMinecraft ().gameSettings.keyBindBack.isKeyDown ())
 			drawTexturedModalRect(l / 2 - 7, i1 / 2 - 7 + 16, 32, 0, 16, 16);
-			sneakMod = 5;
-		}
 
 		if (Minecraft.getMinecraft ().gameSettings.keyBindRight.isKeyDown ())
 			drawTexturedModalRect (l / 2 - 7 + 16, i1 / 2 - 7, 48, 0, 16, 16);
 
 		if (Minecraft.getMinecraft ().gameSettings.keyBindJump.isKeyDown ())
-			drawTexturedModalRect (l / 2 - 7 + (jumpMod > 0 ? 1 : 0), i1 / 2 - 7 - 16 - jumpMod, (jumpMod > 0 ? 32 : 0), 16, 16, 16);
+			drawTexturedModalRect(l / 2 - 7 + 16, i1 / 2 - 7 - 16, 0, 16, 16, 16);
 
 		if (Minecraft.getMinecraft ().gameSettings.keyBindSneak.isKeyDown ())
-			drawTexturedModalRect (l / 2 - 7 - (sneakMod > 0 ? 1 : 0), i1 / 2 - 7 + 16 + sneakMod, 16 + (sneakMod > 0 ? 32 : 0), 16, 16, 16);
+			drawTexturedModalRect(l / 2 - 7 - 16, i1 / 2 - 7 + 16, 16, 16, 16, 16);
 
 		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 		Minecraft.getMinecraft ().getTextureManager().bindTexture(Gui.ICONS);
