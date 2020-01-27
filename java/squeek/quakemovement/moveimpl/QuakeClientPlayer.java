@@ -308,7 +308,7 @@ public class QuakeClientPlayer
 	}
 
 	private static void doHungerJump (EntityPlayer e) {
-		NetworkHandler.INSTANCE.sendToServer (new HungerJumpPacket());
+		NetworkHandler.INSTANCE.sendToServer (new HungerJumpPacket (Minecraft.getMinecraft ().player));
 	}
 
 	public static void applyJumpVelToEntity (EntityLivingBase e, double speed) {

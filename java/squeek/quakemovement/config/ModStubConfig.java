@@ -75,6 +75,9 @@ public class ModStubConfig {
         buf.writeDouble (OVERSPEED);
         buf.writeDouble (OVERSPEED_EXHAUSTION_SCALE);
 
+        buf.writeInt (KNOCKBACK_SLICK_TICKS);
+        buf.writeInt (WALL_CLIP_TICKS);
+
         buf.writeDouble (INCREASED_FALL_DISTANCE);
     }
 
