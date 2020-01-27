@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -27,6 +28,8 @@ import squeek.quakemovement.config.ModConfig;
 import squeek.quakemovement.handler.ConfigPacket;
 import squeek.quakemovement.handler.DrawHUDHandler;
 import squeek.quakemovement.handler.NetworkHandler;
+
+import java.util.ArrayList;
 
 @Mod(modid = ModInfo.MODID, version = ModInfo.VERSION, name="SPMquake", acceptedMinecraftVersions="[1.12.2]", dependencies = "after:squeedometer", guiFactory = ModInfo.CONFIG_GUI_FACTORY_CLASS)
 public class ModQuakeMovement
@@ -74,6 +77,18 @@ public class ModQuakeMovement
 	}
 
 	public static boolean shouldDoQuakeMovement (EntityPlayer player) {
-		return ModConfig.VALUES.ENABLED;
+		boolean playerHasArmor = false;
+
+		if (! ModConfig.VALUES.ARMOR_REQ.isEmpty ()) {
+			Iterable <ItemStack> armors = player.getArmorInventoryList ();
+			for (ItemStack i : armors) {
+				if (i.getItem ().getRegistryName ().toString ().equals (ModConfig.VALUES.ARMOR_REQ))
+					playerHasArmor = true;
+			}
+		} else {
+			playerHasArmor = true;
+		}
+
+		return ModConfig.VALUES.ENABLED && playerHasArmor;
 	}
 }

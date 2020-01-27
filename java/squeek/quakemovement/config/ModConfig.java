@@ -12,6 +12,12 @@ public class ModConfig
 {
 	public static final String CATEGORY_MOVEMENT = "movement";
 
+	private static final String ENABLED_NAME = "enabled";
+	private static final boolean ENABLED_DEFAULT = true;
+
+	private static final String JUMP_INDICATORS_MODE_NAME = "jumpIndicatorMode";
+	private static final int JUMP_INDICATORS_MODE_DEFAULT = 1;
+
 	private static final String ACCELERATE_NAME = "groundAccelerate";
 	private static final double ACCELERATE_DEFAULT = 100.0D;
 
@@ -45,13 +51,8 @@ public class ModConfig
 	private static final String WALL_CLIP_TICKS = "maxWallClipTicks";
 	private static final int WALL_CLIP_TICKS_DEFAULT = 400;
 
-	private static Property ENABLED_PROPERTY;
-	private static final String ENABLED_NAME = "enabled";
-	private static final boolean ENABLED_DEFAULT = true;
-
-	private static Property JUMP_INDICATORS_MODE_PROPERTY;
-	private static final String JUMP_INDICATORS_MODE_NAME = "jumpIndicatorsMode";
-	private static final int JUMP_INDICATORS_MODE_DEFAULT = 1;
+	private static final String ARMOR_REQ_NAME = "armorRequirement";
+	private static final String ARMOR_REQ_DEFAULT = "";
 
 	public static Configuration config = null;
 	public static ModStubConfig VALUES;
@@ -67,14 +68,9 @@ public class ModConfig
 	}
 
 	public static void load() {
-		ENABLED_PROPERTY = config.get(CATEGORY_MOVEMENT, ENABLED_NAME, ENABLED_DEFAULT, "turns off/on the quake-style movement for the client");
-		JUMP_INDICATORS_MODE_PROPERTY = config.get(CATEGORY_MOVEMENT, JUMP_INDICATORS_MODE_NAME, JUMP_INDICATORS_MODE_DEFAULT, "enables the on-screen jump press HUD elements");
-		JUMP_INDICATORS_MODE_PROPERTY.setMaxValue (2);
-		JUMP_INDICATORS_MODE_PROPERTY.setMinValue (0);
-
 		VALUES = new ModStubConfig (
-				ENABLED_PROPERTY.getBoolean(ENABLED_DEFAULT),
-				JUMP_INDICATORS_MODE_PROPERTY.getInt(JUMP_INDICATORS_MODE_DEFAULT),
+				config.get(CATEGORY_MOVEMENT, ENABLED_NAME, ENABLED_DEFAULT, "whether the quake physics are enabled on the client").getBoolean(ENABLED_DEFAULT),
+				config.get(CATEGORY_MOVEMENT, JUMP_INDICATORS_MODE_NAME, JUMP_INDICATORS_MODE_DEFAULT, "selects the crosshair and button indicators to render in the HUD:\n0 - vanilla minecraft\n1 - dot only\n2 - dot and movement key indicators").setMinValue (0).setMaxValue (2).getInt (JUMP_INDICATORS_MODE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, ACCELERATE_NAME, ACCELERATE_DEFAULT, "a higher value means you accelerate faster on the ground").getDouble(ACCELERATE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, SLIDE_ACCELERATE_NAME, SLIDE_ACCELERATE_DEFAULT, "higher slide values allow you to turn sharper while sliding").getDouble(SLIDE_ACCELERATE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, Q1_AIR_ACCELERATE_NAME, Q1_AIR_ACCELERATE_DEFAULT, "acceleration applied when holding only a strafe key").getDouble(Q1_AIR_ACCELERATE_DEFAULT),
@@ -85,7 +81,8 @@ public class ModConfig
 				config.get(CATEGORY_MOVEMENT, OVERSPEED_EXHAUST_SCALE, OVERSPEED_EXHAUST_SCALE_DEFAULT, "minimum speed before receiving hunger costs from oversped jumps").getDouble(OVERSPEED_EXHAUST_SCALE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, KNOCKBACK_TICKS, KNOCKBACK_TICKS_DEFAULT, "number of ticks a player is slicked for after receiving knockback").getInt(KNOCKBACK_TICKS_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, WALL_CLIP_TICKS, WALL_CLIP_TICKS_DEFAULT, "number of ticks during which a player's momentum is preserved after a jump").getInt(WALL_CLIP_TICKS_DEFAULT),
-				(float) (config.get(CATEGORY_MOVEMENT, INCREASED_FALL_DISTANCE_NAME, INCREASED_FALL_DISTANCE_DEFAULT, "increases the distance needed to fall in order to take fall damage; this is a server-side setting").getDouble(INCREASED_FALL_DISTANCE_DEFAULT))
+				(float) (config.get(CATEGORY_MOVEMENT, INCREASED_FALL_DISTANCE_NAME, INCREASED_FALL_DISTANCE_DEFAULT, "increases the distance needed to fall in order to take fall damage; this is a server-side setting").getDouble(INCREASED_FALL_DISTANCE_DEFAULT)),
+				config.get(CATEGORY_MOVEMENT, ARMOR_REQ_NAME, ARMOR_REQ_DEFAULT, "the fully-qualified name of an armor piece that should activate the movement for a player (for example, \"minecraft:diamond_boots\")").getString()
 		);
 
 		save();
@@ -106,9 +103,8 @@ public class ModConfig
 				VALUES.OVERSPEED_EXHAUSTION_SCALE,
 				VALUES.KNOCKBACK_SLICK_TICKS,
 				VALUES.WALL_CLIP_TICKS,
-				VALUES.INCREASED_FALL_DISTANCE);
-
-		ENABLED_PROPERTY.set (enabled);
+				VALUES.INCREASED_FALL_DISTANCE,
+				VALUES.ARMOR_REQ);
 		save ();
 	}
 

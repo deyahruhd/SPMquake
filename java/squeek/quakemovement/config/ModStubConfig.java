@@ -26,8 +26,9 @@ public class ModStubConfig {
     // number of ticks after a jump that the player will maintain their momentum into a wall
     public final int WALL_CLIP_TICKS;
 
-
     public final double INCREASED_FALL_DISTANCE;
+
+    public final String ARMOR_REQ;
 
     public ModStubConfig (boolean enable,
                           int jumpIndicator,
@@ -41,7 +42,8 @@ public class ModStubConfig {
                           double overspeedScale,
                           int slickTicks,
                           int clipTicks,
-                          double fallInc) {
+                          double fallInc,
+                          String qualifiedArmorName) {
         ENABLED = enable;
         JUMP_INDICATORS_MODE = jumpIndicator;
 
@@ -59,9 +61,14 @@ public class ModStubConfig {
         WALL_CLIP_TICKS = clipTicks;
 
         INCREASED_FALL_DISTANCE = fallInc;
+
+        ARMOR_REQ = qualifiedArmorName;
     }
 
     public void to (ByteBuf buf) {
+        buf.writeInt (ARMOR_REQ.length ());
+        buf.writeBytes (ARMOR_REQ.getBytes ());
+
         buf.writeBoolean (ENABLED);
         buf.writeInt (JUMP_INDICATORS_MODE);
 
@@ -77,11 +84,14 @@ public class ModStubConfig {
 
         buf.writeInt (KNOCKBACK_SLICK_TICKS);
         buf.writeInt (WALL_CLIP_TICKS);
-
         buf.writeDouble (INCREASED_FALL_DISTANCE);
     }
 
     public static ModStubConfig from (ByteBuf buf) {
+        int count = buf.readInt ();
+        byte [] armorBytes = new byte [count];
+        buf.readBytes (armorBytes);
+
         return new ModStubConfig (
                 buf.readBoolean (), // enabled
                 buf.readInt (),     // jump indicators enabled
@@ -99,7 +109,9 @@ public class ModStubConfig {
                 buf.readInt (), // knockback slick ticks
                 buf.readInt (), // wall clip ticks
 
-                buf.readDouble ()   // fall dist increase
+                buf.readDouble (),   // fall dist increase
+
+                new String (armorBytes)
         );
     }
 }
