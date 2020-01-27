@@ -12,6 +12,8 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import squeek.quakemovement.ModQuakeMovement;
+import squeek.quakemovement.config.ModConfig;
 import squeek.quakemovement.moveimpl.QuakeClientPlayer;
 
 import java.util.UUID;
@@ -31,11 +33,13 @@ public class HungerJumpPacket implements IMessage, IMessageHandler<HungerJumpPac
 
         EntityPlayerMP player = ctx.getServerHandler ().player;
 
-        if (scaledSpeed >= 5.63) {
-            double scale = Math.log (scaledSpeed - 4.63);
+        if (ModQuakeMovement.shouldDoQuakeMovement (ctx.getServerHandler ().player)
+                && scaledSpeed >= ModConfig.VALUES.OVERSPEED) {
+            double scale = Math.log (scaledSpeed - ModConfig.VALUES.OVERSPEED + 1.0);
             scale *= scale;
 
-            ctx.getServerHandler ().player.getFoodStats ().addExhaustion (0.125f * (float) scale);
+            ctx.getServerHandler ().player.getFoodStats ()
+               .addExhaustion ((float) ModConfig.VALUES.OVERSPEED_EXHAUSTION_SCALE * (float) scale);
         }
 
         return null;

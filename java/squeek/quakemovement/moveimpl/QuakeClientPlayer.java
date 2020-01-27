@@ -189,7 +189,7 @@ public class QuakeClientPlayer
 		// near you, right before you land on the ground, grants you a 50-200ms period of 0 friction. This can
 		// allow doubling or even tripling your speed with a well timed and quick circle jump.
 		// For now it's activated when receiving knockback from an explosion
-		if (player.onGround && (time - playerAirbornTime > 250))
+		if (player.onGround && (time - playerAirbornTime > ModConfig.VALUES.KNOCKBACK_SLICK_TICKS))
 		{
 			BlockPos groundPos = new BlockPos(MathHelper.floor(player.posX), MathHelper.floor(player.getEntityBoundingBox().minY) - 1, MathHelper.floor(player.posZ));
 			Block ground = player.world.getBlockState(groundPos).getBlock();
@@ -516,7 +516,7 @@ public class QuakeClientPlayer
 					if (playerSlide < 0.f)
 						playerSlide = 0.999f;
 					wishspeed *= 3.50f;
-					sv_accelerate = 3000.0D;
+					sv_accelerate = ModConfig.VALUES.SLIDE_ACCELERATE;
 					momentumRetention = 0.99f;
 					dynamicCap = (float) getSpeed (player) * (1.f - (playerSlide - 1.f) * (playerSlide - 1.f));
 					playerSlide = Math.max (playerSlide - 0.01f, 0.f);
@@ -543,7 +543,8 @@ public class QuakeClientPlayer
 				quake_AirAccelerate(player, wishspeed, wishdir[0], wishdir[1], sidemove != 0.f, forwardmove != 0.f);
 			}
 
-			if (getSpeed (player) > 0.21540 && (System.currentTimeMillis () - playerGroundTouchTime > 400) && player.onGround && ! onGroundForReal)
+			if (getSpeed (player) > 0.21540 && (System.currentTimeMillis () - playerGroundTouchTime > ModConfig.VALUES.WALL_CLIP_TICKS)
+					&& player.onGround && ! onGroundForReal)
 				playerGroundTouchTime = System.currentTimeMillis ();
 
 			Vec3d previousVel = new Vec3d (player.motionX, player.motionY, player.motionZ);
@@ -551,7 +552,7 @@ public class QuakeClientPlayer
 			// apply velocity
 			player.move(MoverType.SELF, player.motionX, player.motionY, player.motionZ);
 
-			if ((System.currentTimeMillis () - playerGroundTouchTime <= 400)) {
+			if ((System.currentTimeMillis () - playerGroundTouchTime <= ModConfig.VALUES.WALL_CLIP_TICKS)) {
 				if (player.collidedHorizontally)
 					player.setVelocity(previousVel.x, playerActualVelY, previousVel.z);
 				else if (wasPlayerCollided)
