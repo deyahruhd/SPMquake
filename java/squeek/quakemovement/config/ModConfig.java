@@ -34,9 +34,9 @@ public class ModConfig
 	private static final String ENABLED_NAME = "enabled";
 	private static final boolean ENABLED_DEFAULT = true;
 
-	private static Property JUMP_INDICATORS_ENABLED_PROPERTY;
-	private static final String JUMP_INDICATORS_ENABLED_NAME = "jumpIndicatorsEnabled";
-	private static final boolean JUMP_INDICATORS_ENABLED_DEFAULT = true;
+	private static Property JUMP_INDICATORS_MODE_PROPERTY;
+	private static final String JUMP_INDICATORS_MODE_NAME = "jumpIndicatorsEnabled";
+	private static final int JUMP_INDICATORS_MODE_DEFAULT = 1;
 
 	public static Configuration config = null;
 	public static ModStubConfig VALUES;
@@ -53,11 +53,13 @@ public class ModConfig
 
 	public static void load() {
 		ENABLED_PROPERTY = config.get(CATEGORY_MOVEMENT, ENABLED_NAME, ENABLED_DEFAULT, "turns off/on the quake-style movement for the client");
-		JUMP_INDICATORS_ENABLED_PROPERTY = config.get(CATEGORY_MOVEMENT, JUMP_INDICATORS_ENABLED_NAME, JUMP_INDICATORS_ENABLED_DEFAULT, "enables the on-screen jump press HUD elements");
+		JUMP_INDICATORS_MODE_PROPERTY = config.get(CATEGORY_MOVEMENT, JUMP_INDICATORS_MODE_NAME, JUMP_INDICATORS_MODE_DEFAULT, "enables the on-screen jump press HUD elements");
+		JUMP_INDICATORS_MODE_PROPERTY.setMaxValue (2);
+		JUMP_INDICATORS_MODE_PROPERTY.setMinValue (0);
 
 		VALUES = new ModStubConfig (
 				ENABLED_PROPERTY.getBoolean(ENABLED_DEFAULT),
-				JUMP_INDICATORS_ENABLED_PROPERTY.getBoolean(JUMP_INDICATORS_ENABLED_DEFAULT),
+				JUMP_INDICATORS_MODE_PROPERTY.getInt(JUMP_INDICATORS_MODE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, ACCELERATE_NAME, ACCELERATE_DEFAULT, "a higher value means you accelerate faster on the ground").getDouble(ACCELERATE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, Q1_AIR_ACCELERATE_NAME, Q1_AIR_ACCELERATE_DEFAULT, "acceleration applied when holding only a strafe key").getDouble(Q1_AIR_ACCELERATE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, Q3_AIR_ACCELERATE_NAME, Q3_AIR_ACCELERATE_DEFAULT, "acceleration applied when holding forward + a strafe key").getDouble(Q3_AIR_ACCELERATE_DEFAULT),
@@ -72,7 +74,7 @@ public class ModConfig
 	{
 		VALUES = new ModStubConfig (
 				enabled,
-				VALUES.JUMP_INDICATORS_ENABLED,
+				VALUES.JUMP_INDICATORS_MODE,
 				VALUES.ACCELERATE,
 				VALUES.Q1_AIR_ACCELERATE,
 				VALUES.Q3_AIR_ACCELERATE,

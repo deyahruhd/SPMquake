@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 
 public class ModStubConfig {
     public final boolean ENABLED;
-    public final boolean JUMP_INDICATORS_ENABLED;
+    public final int JUMP_INDICATORS_MODE;
 
     public final double ACCELERATE;
     public final double Q1_AIR_ACCELERATE;
@@ -17,7 +17,7 @@ public class ModStubConfig {
     public final double INCREASED_FALL_DISTANCE;
 
     public ModStubConfig (boolean enable,
-                          boolean jumpIndicator,
+                          int jumpIndicator,
                           double groundAccel,
                           double q1Accel,
                           double q3Accel,
@@ -25,7 +25,7 @@ public class ModStubConfig {
                           double q3MaxAccel,
                           double fallInc) {
         ENABLED = enable;
-        JUMP_INDICATORS_ENABLED = jumpIndicator;
+        JUMP_INDICATORS_MODE = jumpIndicator;
 
         ACCELERATE = groundAccel;
         Q1_AIR_ACCELERATE = q1Accel;
@@ -38,7 +38,7 @@ public class ModStubConfig {
 
     public void to (ByteBuf buf) {
         buf.writeBoolean (ENABLED);
-        buf.writeBoolean (JUMP_INDICATORS_ENABLED);
+        buf.writeInt (JUMP_INDICATORS_MODE);
 
         buf.writeDouble (ACCELERATE);
         buf.writeDouble (Q1_AIR_ACCELERATE);
@@ -52,7 +52,7 @@ public class ModStubConfig {
     public static ModStubConfig from (ByteBuf buf) {
         return new ModStubConfig (
                 buf.readBoolean (), // enabled
-                buf.readBoolean (), // jump indicators enabled
+                buf.readInt (),     // jump indicators enabled
 
                 buf.readDouble (),  // ground accel
                 buf.readDouble (),  // q1 air accel

@@ -22,6 +22,8 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import squeek.quakemovement.ModQuakeMovement;
 import squeek.quakemovement.config.ModConfig;
+import squeek.quakemovement.handler.NetworkHandler;
+import squeek.quakemovement.handler.HungerJumpPacket;
 
 public class QuakeClientPlayer
 {
@@ -172,7 +174,7 @@ public class QuakeClientPlayer
 	 * =================================================
 	 */
 
-	private static double getSpeed(EntityPlayer player)
+	public static double getSpeed(EntityPlayer player)
 	{
 		return MathHelper.sqrt(player.motionX * player.motionX + player.motionZ * player.motionZ);
 	}
@@ -305,8 +307,12 @@ public class QuakeClientPlayer
 		playerAirbornTime = System.currentTimeMillis();
 	}
 
+	private static void doHungerJump (EntityPlayer e) {
+		NetworkHandler.INSTANCE.sendToServer (new HungerJumpPacket());
+	}
+
 	public static void applyJumpVelToEntity (EntityLivingBase e, double speed) {
-		if (!(e instanceof EntityPlayer) || (e instanceof EntityPlayer && !ModQuakeMovement.shouldDoQuakeMovement((EntityPlayer) e)))
+		if (!(e instanceof EntityPlayer) || !ModQuakeMovement.shouldDoQuakeMovement((EntityPlayer) e))
 			e.motionY = speed;
 		else if (e.onGround) {
 			double prevMotionY = e.motionY;
@@ -322,6 +328,8 @@ public class QuakeClientPlayer
 			playerActualVelY = e.motionY;
 			// But set the ramp jump accordingly in case we do end up wall clipping
 			playerRampJumpY  = playerActualVelY + rampJumpAdd;
+
+			doHungerJump ((EntityPlayer) e);
 		}
 	}
 

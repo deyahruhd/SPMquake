@@ -9,5 +9,6 @@ public class NetworkHandler {
 
     public static void init() {
         INSTANCE.registerMessage(ConfigPacket.class, ConfigPacket.class, 0, Side.CLIENT);
+        INSTANCE.registerMessage(HungerJumpPacket.class, HungerJumpPacket.class, 0, Side.SERVER);
     }
 }

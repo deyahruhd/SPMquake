@@ -19,36 +19,49 @@ public class DrawHUDHandler {
 
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
-    public void onPostDraw (RenderGameOverlayEvent.Post event) {
-        if (!ModQuakeMovement.shouldDoQuakeMovement (Minecraft.getMinecraft().player) || ! ModConfig.VALUES.JUMP_INDICATORS_ENABLED)
+    public void onPostDraw (RenderGameOverlayEvent event) {
+        if (!ModQuakeMovement.shouldDoQuakeMovement(Minecraft.getMinecraft().player))
             return;
 
-        int l = event.getResolution ().getScaledWidth ();
-        int i1 = event.getResolution ().getScaledHeight ();
+        int l = event.getResolution().getScaledWidth();
+        int i1 = event.getResolution().getScaledHeight();
 
-        Minecraft.getMinecraft ().getTextureManager().bindTexture(JUMP_INDICATORS);
-        GlStateManager.enableAlpha ();
+        if (event instanceof RenderGameOverlayEvent.Post && ModConfig.VALUES.JUMP_INDICATORS_MODE > 1) {
 
-        if (Minecraft.getMinecraft ().gameSettings.keyBindForward.isKeyDown ())
-            drawTexturedModalRect(l / 2 - 7, i1 / 2 - 7 - 16, 0, 0, 16, 16);
+            Minecraft.getMinecraft().getTextureManager().bindTexture(JUMP_INDICATORS);
+            GlStateManager.enableAlpha();
 
-        if (Minecraft.getMinecraft ().gameSettings.keyBindLeft.isKeyDown ())
-            drawTexturedModalRect (l / 2 - 7 - 16, i1 / 2 - 7, 16, 0, 16, 16);
+            if (Minecraft.getMinecraft().gameSettings.keyBindForward.isKeyDown())
+                drawTexturedModalRect(l / 2 - 7, i1 / 2 - 7 - 16, 0, 0, 16, 16);
 
-        if (Minecraft.getMinecraft ().gameSettings.keyBindBack.isKeyDown ())
-            drawTexturedModalRect(l / 2 - 7, i1 / 2 - 7 + 16, 32, 0, 16, 16);
+            if (Minecraft.getMinecraft().gameSettings.keyBindLeft.isKeyDown())
+                drawTexturedModalRect(l / 2 - 7 - 16, i1 / 2 - 7, 16, 0, 16, 16);
 
-        if (Minecraft.getMinecraft ().gameSettings.keyBindRight.isKeyDown ())
-            drawTexturedModalRect (l / 2 - 7 + 16, i1 / 2 - 7, 48, 0, 16, 16);
+            if (Minecraft.getMinecraft().gameSettings.keyBindBack.isKeyDown())
+                drawTexturedModalRect(l / 2 - 7, i1 / 2 - 7 + 16, 32, 0, 16, 16);
 
-        if (Minecraft.getMinecraft ().gameSettings.keyBindJump.isKeyDown ())
-            drawTexturedModalRect(l / 2 - 7 + 16, i1 / 2 - 7 - 16, 0, 16, 16, 16);
+            if (Minecraft.getMinecraft().gameSettings.keyBindRight.isKeyDown())
+                drawTexturedModalRect(l / 2 - 7 + 16, i1 / 2 - 7, 48, 0, 16, 16);
 
-        if (Minecraft.getMinecraft ().gameSettings.keyBindSneak.isKeyDown ())
-            drawTexturedModalRect(l / 2 - 7 - 16, i1 / 2 - 7 + 16, 16, 16, 16, 16);
+            if (Minecraft.getMinecraft().gameSettings.keyBindJump.isKeyDown())
+                drawTexturedModalRect(l / 2 - 7 + 16, i1 / 2 - 7 - 16, 0, 16, 16, 16);
 
-        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        Minecraft.getMinecraft ().getTextureManager().bindTexture(Gui.ICONS);
+            if (Minecraft.getMinecraft().gameSettings.keyBindSneak.isKeyDown())
+                drawTexturedModalRect(l / 2 - 7 - 16, i1 / 2 - 7 + 16, 16, 16, 16, 16);
+
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
+        } else if (event.getType () == RenderGameOverlayEvent.ElementType.CROSSHAIRS && ModConfig.VALUES.JUMP_INDICATORS_MODE > 0) {
+            event.setCanceled(true);
+
+            Minecraft.getMinecraft().getTextureManager().bindTexture(JUMP_INDICATORS);
+            GlStateManager.enableAlpha();
+
+            drawTexturedModalRect(l / 2 - 7, i1 / 2 - 7, 32, 32, 16, 16);
+
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
+        }
     }
 
     @SideOnly (Side.CLIENT)
