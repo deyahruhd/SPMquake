@@ -40,7 +40,9 @@ public class QuakeClientPlayer
 	private static float playerSlide 		  = -1.f;
 
 	// Ramp jump
-	private static double playerActualVelY    = 0.0;
+	private static double  playerActualVelY    = 0.0;
+	private static double  playerRampJumpY     = 0.0;
+	private static boolean wasPlayerCollided   = false;
 
 	static
 	{
@@ -304,15 +306,22 @@ public class QuakeClientPlayer
 	}
 
 	public static void applyJumpVelToEntity (EntityLivingBase e, double speed) {
-		if (! (e instanceof EntityPlayer) || (e instanceof EntityPlayer && ! ModQuakeMovement.shouldDoQuakeMovement ((EntityPlayer) e)))
+		if (!(e instanceof EntityPlayer) || (e instanceof EntityPlayer && !ModQuakeMovement.shouldDoQuakeMovement((EntityPlayer) e)))
 			e.motionY = speed;
-		else {
-			if (playerActualVelY >= 0.0)
-				e.motionY = (Math.ceil (playerActualVelY / speed) * speed) + speed;
-			else
-				e.motionY = speed;
+		else if (e.onGround) {
+			double prevMotionY = e.motionY;
 
+			e.motionY = speed;
+
+			double rampJumpAdd = 0.0;
+
+			if (playerActualVelY >= 0.0)
+				rampJumpAdd = (Math.ceil(playerActualVelY / speed) * speed);
+
+			// Actual velocity is the player's jump velocity without a ramp jump
 			playerActualVelY = e.motionY;
+			// But set the ramp jump accordingly in case we do end up wall clipping
+			playerRampJumpY  = playerActualVelY + rampJumpAdd;
 		}
 	}
 
@@ -537,11 +546,19 @@ public class QuakeClientPlayer
 			if ((System.currentTimeMillis () - playerGroundTouchTime <= 400)) {
 				if (player.collidedHorizontally)
 					player.setVelocity(previousVel.x, playerActualVelY, previousVel.z);
+				else if (wasPlayerCollided)
+					player.setVelocity(previousVel.x, playerRampJumpY, previousVel.z);
 			}
 
 			// HL2 code applies half gravity before acceleration and half after acceleration, but this seems to work fine
 			minecraft_ApplyGravity(player);
+
 		}
+
+		playerActualVelY = player.motionY;
+		playerRampJumpY  = (playerActualVelY + playerRampJumpY) / 2.0;
+		wasPlayerCollided = player.collidedHorizontally;
+
 
 		// swing them arms
 		minecraft_SwingLimbsBasedOnMovement(player);
