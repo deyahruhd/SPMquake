@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockStairs;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -12,12 +13,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.Explosion;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import squeek.quakemovement.ModQuakeMovement;
@@ -41,10 +46,8 @@ public class QuakeClientPlayer
 	// Sliding
 	private static float playerSlide 		  = -1.f;
 
-	// Ramp jump
-	private static double  playerActualVelY    = 0.0;
-	private static double  playerRampJumpY     = 0.0;
-	private static boolean wasPlayerCollided   = false;
+	// Double jump
+	private static long playerJumpTime        = 0;
 
 	static
 	{
@@ -317,18 +320,12 @@ public class QuakeClientPlayer
 		else if (e.onGround) {
 			double prevMotionY = e.motionY;
 
-			e.motionY = speed;
+			if (System.currentTimeMillis () - playerJumpTime > 400)
+				e.motionY = (Math.ceil(e.motionY / speed) * speed) + speed;
+			else
+				e.motionY = speed;
 
-			double rampJumpAdd = 0.0;
-
-			if (playerActualVelY >= 0.0)
-				rampJumpAdd = (Math.ceil(playerActualVelY / speed) * speed);
-
-			// Actual velocity is the player's jump velocity without a ramp jump
-			playerActualVelY = e.motionY;
-			// But set the ramp jump accordingly in case we do end up wall clipping
-			playerRampJumpY  = playerActualVelY + rampJumpAdd;
-
+			playerJumpTime = System.currentTimeMillis ();
 			doHungerJump ((EntityPlayer) e);
 		}
 	}
@@ -341,6 +338,17 @@ public class QuakeClientPlayer
 			entity.addVelocity(x * scale, y * scale, z * scale);
 		} else
 			entity.setVelocity (x, y, z);
+	}
+
+	private static IBlockState tryFindStair (World w, Vec3d pos, IBlockState existing) {
+		if (existing != null)
+			return existing;
+
+		IBlockState state = w.getBlockState (new BlockPos (pos));
+		if (state.getBlock () instanceof BlockStairs)
+			return state;
+		else
+			return null;
 	}
 
 	/* =================================================
@@ -365,19 +373,15 @@ public class QuakeClientPlayer
 			{
 				player.motionY = 0.0D;
 			}
-
-			playerActualVelY = player.motionY;
 		}
 		else
 		{
 			// gravity
 			player.motionY -= 0.08D;
-			playerActualVelY -= 0.08D;
 		}
 
 		// air resistance
 		player.motionY   *= 0.9800000190734863D;
-		playerActualVelY *= 0.9800000190734863D;
 	}
 
 	private static void minecraft_ApplyFriction(EntityPlayer player, float momentumRetention)
@@ -499,6 +503,7 @@ public class QuakeClientPlayer
 		}
 		else
 		{
+
 			// get all relevant movement values
 			float wishspeed = (sidemove != 0.0F || forwardmove != 0.0F) ? quake_getMoveSpeed(player) : 0.0F;
 			float[] wishdir = getMovementDirection(player, sidemove, forwardmove);
@@ -510,7 +515,6 @@ public class QuakeClientPlayer
 			// ground movement
 			if (onGroundForReal)
 			{
-				playerActualVelY = 0.0;
 				float dynamicCap = -1.0f;
 				if (player.isSneaking () && getSpeed (player) > 0.21540) {
 					if (playerSlide < 0.f)
@@ -553,21 +557,46 @@ public class QuakeClientPlayer
 			player.move(MoverType.SELF, player.motionX, player.motionY, player.motionZ);
 
 			if ((System.currentTimeMillis () - playerGroundTouchTime <= ModConfig.VALUES.WALL_CLIP_TICKS)) {
-				if (player.collidedHorizontally)
-					player.setVelocity(previousVel.x, playerActualVelY, previousVel.z);
-				else if (wasPlayerCollided)
-					player.setVelocity(previousVel.x, playerRampJumpY, previousVel.z);
+				player.setVelocity(previousVel.x, player.motionY, previousVel.z);
+				previousVel = new Vec3d (previousVel.x, player.motionY, previousVel.z);
+			}
+
+			// Handle ramp jumping logic
+			if (player.collided && previousVel.lengthSquared() > 0.0625) {
+				IBlockState collidedVertBlock = null;
+
+				Vec3d pos = player.getPositionVector ();
+
+				if (previousVel.y > 0)
+					pos = pos.add(0.0, player.getEyeHeight () + 0.01, 0);
+				else
+					pos = pos.add(0.0, - 0.01, 0);
+
+				collidedVertBlock = tryFindStair (player.world, pos.add (0.5 * player.width, 0.0, 0.5 * player.width), collidedVertBlock);
+				collidedVertBlock = tryFindStair (player.world, pos.add (-0.5 * player.width, 0.0, 0.5 * player.width), collidedVertBlock);
+				collidedVertBlock = tryFindStair (player.world, pos.add (-0.5 * player.width, 0.0, -0.5 * player.width), collidedVertBlock);
+				collidedVertBlock = tryFindStair (player.world, pos.add (0.5 * player.width, 0.0, -0.5 * player.width), collidedVertBlock);
+
+				if (collidedVertBlock != null && collidedVertBlock.getBlock () instanceof BlockStairs) {
+					Vec3i horizontalDir = collidedVertBlock.getValue (BlockStairs.FACING).getDirectionVec ();
+					int   verticalDir   = ((BlockStairs.EnumHalf) collidedVertBlock.getValue (BlockStairs.HALF)).name ().equals ("top")
+							              ? -1
+										  :  1;
+
+
+					Vec3d d = previousVel.normalize ();
+					Vec3d n = new Vec3d (-horizontalDir.getX (), verticalDir, -horizontalDir.getZ ()).normalize ();
+					double dotScale = MathHelper.clamp(1.0 - d.dotProduct (n), 0.0, 1.0);
+					Vec3d r = d.subtract (n.scale (d.dotProduct(n) * 2)).scale (previousVel.length () * dotScale);
+
+					player.setVelocity (r.x, r.y, r.z);
+				}
 			}
 
 			// HL2 code applies half gravity before acceleration and half after acceleration, but this seems to work fine
 			minecraft_ApplyGravity(player);
 
 		}
-
-		playerActualVelY = player.motionY;
-		playerRampJumpY  = (playerActualVelY + playerRampJumpY) / 2.0;
-		wasPlayerCollided = player.collidedHorizontally;
-
 
 		// swing them arms
 		minecraft_SwingLimbsBasedOnMovement(player);
