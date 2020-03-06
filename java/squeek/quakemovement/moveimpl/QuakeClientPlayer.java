@@ -49,6 +49,10 @@ public class QuakeClientPlayer
 	// Double jump
 	private static long playerJumpTime        = 0;
 
+	// Ramp jump
+	private static boolean jumpedThisTick     = false;
+	private static double jumpVel 			  = 0.0;
+
 	static
 	{
 		try
@@ -318,12 +322,9 @@ public class QuakeClientPlayer
 		if (!(e instanceof EntityPlayer) || !ModQuakeMovement.shouldDoQuakeMovement((EntityPlayer) e))
 			e.motionY = speed;
 		else if (e.onGround) {
-			double prevMotionY = e.motionY;
-
-			if (System.currentTimeMillis () - playerJumpTime > 400)
-				e.motionY = (Math.ceil(e.motionY / speed) * speed) + speed;
-			else
-				e.motionY = speed;
+			jumpedThisTick = true;
+			jumpVel = speed;
+			e.motionY = speed;
 
 			playerJumpTime = System.currentTimeMillis ();
 			doHungerJump ((EntityPlayer) e);
@@ -487,6 +488,7 @@ public class QuakeClientPlayer
 	 */
 	public static boolean quake_moveEntityWithHeading(EntityPlayer player, float sidemove, float upmove, float forwardmove)
 	{
+		jumpedThisTick = false;
 		// take care of ladder movement using default code
 		if (player.isOnLadder())
 		{
@@ -556,41 +558,47 @@ public class QuakeClientPlayer
 			// apply velocity
 			player.move(MoverType.SELF, player.motionX, player.motionY, player.motionZ);
 
-			if ((System.currentTimeMillis () - playerGroundTouchTime <= ModConfig.VALUES.WALL_CLIP_TICKS)) {
-				player.setVelocity(previousVel.x, player.motionY, previousVel.z);
-				previousVel = new Vec3d (previousVel.x, player.motionY, previousVel.z);
-			}
-
 			// Handle ramp jumping logic
 			if (player.collided && previousVel.lengthSquared() > 0.0625) {
 				IBlockState collidedVertBlock = null;
 
 				Vec3d pos = player.getPositionVector ();
 
-				if (previousVel.y > 0)
-					pos = pos.add(0.0, player.getEyeHeight () + 0.01, 0);
-				else
-					pos = pos.add(0.0, - 0.01, 0);
+				if (player.collidedVertically) {
+					if (previousVel.y > 0)
+						pos = pos.add(0.0, player.getEyeHeight() + 0.01, 0.0);
+					else
+						pos = pos.add(0.0, -0.11, 0.0);
+				}
 
-				collidedVertBlock = tryFindStair (player.world, pos.add (0.5 * player.width, 0.0, 0.5 * player.width), collidedVertBlock);
-				collidedVertBlock = tryFindStair (player.world, pos.add (-0.5 * player.width, 0.0, 0.5 * player.width), collidedVertBlock);
-				collidedVertBlock = tryFindStair (player.world, pos.add (-0.5 * player.width, 0.0, -0.5 * player.width), collidedVertBlock);
-				collidedVertBlock = tryFindStair (player.world, pos.add (0.5 * player.width, 0.0, -0.5 * player.width), collidedVertBlock);
+				final double playerWidth = (player.width * 0.5) - 0.1;
+				collidedVertBlock = tryFindStair (player.world, pos.add ( playerWidth, 0.0,  playerWidth), null);
+				collidedVertBlock = tryFindStair (player.world, pos.add (-playerWidth, 0.0,  playerWidth), collidedVertBlock);
+				collidedVertBlock = tryFindStair (player.world, pos.add (-playerWidth, 0.0, -playerWidth), collidedVertBlock);
+				collidedVertBlock = tryFindStair (player.world, pos.add ( playerWidth, 0.0, -playerWidth), collidedVertBlock);
 
 				if (collidedVertBlock != null && collidedVertBlock.getBlock () instanceof BlockStairs) {
 					Vec3i horizontalDir = collidedVertBlock.getValue (BlockStairs.FACING).getDirectionVec ();
-					int   verticalDir   = ((BlockStairs.EnumHalf) collidedVertBlock.getValue (BlockStairs.HALF)).name ().equals ("top")
-							              ? -1
-										  :  1;
+					int   verticalDir   = collidedVertBlock.getValue (BlockStairs.HALF).name ().equals ("top")
+							? -1
+							:  1;
 
 
 					Vec3d d = previousVel.normalize ();
 					Vec3d n = new Vec3d (-horizontalDir.getX (), verticalDir, -horizontalDir.getZ ()).normalize ();
-					double dotScale = MathHelper.clamp(1.0 - d.dotProduct (n), 0.0, 1.0);
-					Vec3d r = d.subtract (n.scale (d.dotProduct(n) * 2)).scale (previousVel.length () * dotScale);
+					double dotScale = MathHelper.clamp (1.0 + d.dotProduct (n), 0.0, 1.0);
+					Vec3d r = d.subtract (n.scale (d.dotProduct(n) * 2)).scale (previousVel.length ());
 
 					player.setVelocity (r.x, r.y, r.z);
+					previousVel = r;
+					playerGroundTouchTime = System.currentTimeMillis ();
 				}
+			}
+
+			// Wall clip
+			if ((System.currentTimeMillis () - playerGroundTouchTime <= ModConfig.VALUES.WALL_CLIP_TICKS)) {
+				player.setVelocity(previousVel.x, player.motionY, previousVel.z);
+				previousVel = new Vec3d (previousVel.x, player.motionY, previousVel.z);
 			}
 
 			// HL2 code applies half gravity before acceleration and half after acceleration, but this seems to work fine
