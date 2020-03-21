@@ -13,9 +13,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.MathHelper;
@@ -548,14 +546,14 @@ public class QuakeClientPlayer
 			player.move(MoverType.SELF, player.motionX, player.motionY, player.motionZ);
 
 			// Handle ramp jumping logic
-			if (player.collided && previousVel.lengthSquared() > 0.0625) {
+			if (player.collided && ! onGroundForReal && previousVel.lengthSquared() > 0.0625) {
 				IBlockState collidedVertBlock;
 
 				Vec3d pos = player.getPositionVector ();
 
 				if (player.collidedVertically) {
 					if (previousVel.y > 0)
-						pos = pos.add(0.0, player.getEyeHeight() + 0.01, 0.0);
+						pos = pos.add(0.0, player.getEyeHeight() + 0.51, 0.0);
 					else
 						pos = pos.add(0.0, -0.11, 0.0);
 				} else
@@ -569,13 +567,14 @@ public class QuakeClientPlayer
 
 				if (collidedVertBlock != null && collidedVertBlock.getBlock () instanceof BlockStairs) {
 					Vec3i horizontalDir = collidedVertBlock.getValue (BlockStairs.FACING).getDirectionVec ();
-					int   verticalDir   = collidedVertBlock.getValue (BlockStairs.HALF).name ().equals ("top")
+					int   verticalDir   = collidedVertBlock.getValue (BlockStairs.HALF) == BlockStairs.EnumHalf.TOP
 							? -1
 							:  1;
 
 
 					Vec3d d = previousVel.normalize ();
 					Vec3d n = new Vec3d (-horizontalDir.getX (), verticalDir, -horizontalDir.getZ ()).normalize ();
+
 					double dotScale = MathHelper.clamp (1.0 + d.dotProduct (n), 0.0, 1.0);
 					Vec3d r = d.subtract (n.scale (d.dotProduct(n) * 2)).scale (previousVel.length ());
 
