@@ -575,8 +575,10 @@ public class QuakeClientPlayer
 					Vec3d d = previousVel.normalize ();
 					Vec3d n = new Vec3d (-horizontalDir.getX (), verticalDir, -horizontalDir.getZ ()).normalize ();
 
-					double dotScale = MathHelper.clamp (1.0 + d.dotProduct (n), 0.0, 1.0);
-					Vec3d r = d.subtract (n.scale (d.dotProduct(n) * 2)).scale (previousVel.length ());
+					Vec3d r = d.subtract (n.scale (d.dotProduct(n) * 2));
+
+					double elasticity = MathHelper.clamp (1.15 - Math.pow (r.dotProduct (n), 4.0), 0.15, 1.0);
+					r = r.scale (elasticity * previousVel.length ());
 
 					player.setVelocity (r.x, r.y, r.z);
 					previousVel = r;
