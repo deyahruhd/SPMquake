@@ -14,6 +14,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.MathHelper;
@@ -329,15 +330,29 @@ public class QuakeClientPlayer
 			entity.setVelocity (x, y, z);
 	}
 
-	private static IBlockState tryFindStair (World w, Vec3d pos, IBlockState existing) {
-		if (existing != null)
-			return existing;
+	private static Vec3d getStairNormal (World w, Vec3d pos, double scanWidth, double playerWidth) {
+		Vec3d stairNormal = Vec3d.ZERO;
 
-		IBlockState state = w.getBlockState (new BlockPos (pos));
-		if (state.getBlock () instanceof BlockStairs)
-			return state;
-		else
-			return null;
+		for (BlockPos scanPos : new BlockPos [] {
+				new BlockPos (new Vec3d (pos.x + scanWidth, pos.y, pos.z + scanWidth)),
+				new BlockPos (new Vec3d (pos.x + scanWidth, pos.y, pos.z - scanWidth)),
+				new BlockPos (new Vec3d (pos.x - scanWidth, pos.y, pos.z - scanWidth)),
+				new BlockPos (new Vec3d (pos.x - scanWidth, pos.y, pos.z + scanWidth))}) {
+			IBlockState state = w.getBlockState (scanPos);
+
+			if (state.getBlock() instanceof BlockStairs) {
+				EnumFacing face = state.getValue (BlockStairs.FACING);
+
+				Vec3i horizontalDir = face.getDirectionVec();
+				int verticalDir = state.getValue(BlockStairs.HALF) == BlockStairs.EnumHalf.TOP
+						? -1
+						: 1;
+
+				stairNormal = stairNormal.add(new Vec3d(-horizontalDir.getX(), verticalDir, -horizontalDir.getZ()));
+			}
+		}
+
+		return (stairNormal == Vec3d.ZERO) ? null : stairNormal.normalize ();
 	}
 
 	/* =================================================
@@ -547,42 +562,27 @@ public class QuakeClientPlayer
 
 			// Handle ramp jumping logic
 			if (player.collided && ! onGroundForReal && previousVel.lengthSquared() > 0.0625) {
-				IBlockState collidedVertBlock;
-
 				Vec3d pos = player.getPositionVector ();
 
-				if (player.collidedVertically) {
+				double playerWidth = player.width * 0.5 + 0.1;
+				if (player.collidedVertically)
 					if (previousVel.y > 0)
 						pos = pos.add(0.0, player.getEyeHeight() + 0.51, 0.0);
 					else
 						pos = pos.add(0.0, -0.11, 0.0);
-				} else
-					pos = pos.add (0.0, 0.11, 0.0);
 
-				final double playerWidth = player.width * 0.5;
-				collidedVertBlock = tryFindStair (player.world, pos.add ( playerWidth, 0.0,  playerWidth), null);
-				collidedVertBlock = tryFindStair (player.world, pos.add (-playerWidth, 0.0,  playerWidth), collidedVertBlock);
-				collidedVertBlock = tryFindStair (player.world, pos.add (-playerWidth, 0.0, -playerWidth), collidedVertBlock);
-				collidedVertBlock = tryFindStair (player.world, pos.add ( playerWidth, 0.0, -playerWidth), collidedVertBlock);
+				Vec3d n = getStairNormal (player.world, pos, playerWidth, player.width * 0.5);
+				Vec3d d = previousVel.normalize ();
 
-				if (collidedVertBlock != null && collidedVertBlock.getBlock () instanceof BlockStairs) {
-					Vec3i horizontalDir = collidedVertBlock.getValue (BlockStairs.FACING).getDirectionVec ();
-					int   verticalDir   = collidedVertBlock.getValue (BlockStairs.HALF) == BlockStairs.EnumHalf.TOP
-							? -1
-							:  1;
+				if (n != null && n.dotProduct(d) < 0.0) {
+					Vec3d r = d.subtract(n.scale(d.dotProduct(n) * 2));
 
+					double elasticity = MathHelper.clamp(1.15 - Math.pow(r.dotProduct(n), 4.0), 0.15, 1.0);
+					r = r.scale(elasticity * previousVel.length());
 
-					Vec3d d = previousVel.normalize ();
-					Vec3d n = new Vec3d (-horizontalDir.getX (), verticalDir, -horizontalDir.getZ ()).normalize ();
-
-					Vec3d r = d.subtract (n.scale (d.dotProduct(n) * 2));
-
-					double elasticity = MathHelper.clamp (1.15 - Math.pow (r.dotProduct (n), 4.0), 0.15, 1.0);
-					r = r.scale (elasticity * previousVel.length ());
-
-					player.setVelocity (r.x, r.y, r.z);
+					player.setVelocity(r.x, r.y, r.z);
 					previousVel = r;
-					playerGroundTouchTime = System.currentTimeMillis ();
+					playerGroundTouchTime = System.currentTimeMillis();
 				}
 			}
 
