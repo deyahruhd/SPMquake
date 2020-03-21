@@ -46,13 +46,6 @@ public class QuakeClientPlayer
 	// Sliding
 	private static float playerSlide 		  = -1.f;
 
-	// Double jump
-	private static long playerJumpTime        = 0;
-
-	// Ramp jump
-	private static boolean jumpedThisTick     = false;
-	private static double jumpVel 			  = 0.0;
-
 	static
 	{
 		try
@@ -322,11 +315,8 @@ public class QuakeClientPlayer
 		if (!(e instanceof EntityPlayer) || !ModQuakeMovement.shouldDoQuakeMovement((EntityPlayer) e))
 			e.motionY = speed;
 		else if (e.onGround) {
-			jumpedThisTick = true;
-			jumpVel = speed;
 			e.motionY = speed;
 
-			playerJumpTime = System.currentTimeMillis ();
 			doHungerJump ((EntityPlayer) e);
 		}
 	}
@@ -488,7 +478,6 @@ public class QuakeClientPlayer
 	 */
 	public static boolean quake_moveEntityWithHeading(EntityPlayer player, float sidemove, float upmove, float forwardmove)
 	{
-		jumpedThisTick = false;
 		// take care of ladder movement using default code
 		if (player.isOnLadder())
 		{
@@ -560,7 +549,7 @@ public class QuakeClientPlayer
 
 			// Handle ramp jumping logic
 			if (player.collided && previousVel.lengthSquared() > 0.0625) {
-				IBlockState collidedVertBlock = null;
+				IBlockState collidedVertBlock;
 
 				Vec3d pos = player.getPositionVector ();
 
@@ -569,9 +558,10 @@ public class QuakeClientPlayer
 						pos = pos.add(0.0, player.getEyeHeight() + 0.01, 0.0);
 					else
 						pos = pos.add(0.0, -0.11, 0.0);
-				}
+				} else
+					pos = pos.add (0.0, 0.11, 0.0);
 
-				final double playerWidth = (player.width * 0.5) - 0.1;
+				final double playerWidth = player.width * 0.5;
 				collidedVertBlock = tryFindStair (player.world, pos.add ( playerWidth, 0.0,  playerWidth), null);
 				collidedVertBlock = tryFindStair (player.world, pos.add (-playerWidth, 0.0,  playerWidth), collidedVertBlock);
 				collidedVertBlock = tryFindStair (player.world, pos.add (-playerWidth, 0.0, -playerWidth), collidedVertBlock);
@@ -596,14 +586,13 @@ public class QuakeClientPlayer
 			}
 
 			// Wall clip
-			if ((System.currentTimeMillis () - playerGroundTouchTime <= ModConfig.VALUES.WALL_CLIP_TICKS)) {
+            if ((System.currentTimeMillis () - playerGroundTouchTime <= ModConfig.VALUES.WALL_CLIP_TICKS)) {
 				player.setVelocity(previousVel.x, player.motionY, previousVel.z);
-				previousVel = new Vec3d (previousVel.x, player.motionY, previousVel.z);
+				previousVel = new Vec3d(previousVel.x, player.motionY, previousVel.z);
 			}
 
 			// HL2 code applies half gravity before acceleration and half after acceleration, but this seems to work fine
 			minecraft_ApplyGravity(player);
-
 		}
 
 		// swing them arms
