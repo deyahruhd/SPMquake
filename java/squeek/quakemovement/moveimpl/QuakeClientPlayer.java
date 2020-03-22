@@ -578,7 +578,7 @@ public class QuakeClientPlayer
 					Vec3d r = d.subtract(n.scale(d.dotProduct(n) * 2));
 
 					double elasticity = MathHelper.clamp(1.15 - Math.pow(r.dotProduct(n), 4.0), 0.15, 1.0);
-					r = r.scale(elasticity * previousVel.length());
+					r = r.scale(elasticity * previousVel.length() * ModConfig.VALUES.RAMP_JUMP_SCALE);
 
 					player.setVelocity(r.x, r.y, r.z);
 					previousVel = r;

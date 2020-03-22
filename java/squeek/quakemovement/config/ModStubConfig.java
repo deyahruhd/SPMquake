@@ -26,6 +26,9 @@ public class ModStubConfig {
     // number of milliseconds after a jump that the player will maintain their momentum into a wall
     public final int WALL_CLIP_TIME;
 
+    // multiplier for ramp jump elasticity; set to 0.0 to completely disable ramp jumps
+    public final double RAMP_JUMP_SCALE;
+
     public final double INCREASED_FALL_DISTANCE;
 
     public final String ARMOR_REQ;
@@ -43,6 +46,7 @@ public class ModStubConfig {
                           int slickTime,
                           int clipTime,
                           double fallInc,
+                          double rampJumpScale,
                           String qualifiedArmorName) {
         ENABLED = enable;
         JUMP_INDICATORS_MODE = jumpIndicator;
@@ -59,6 +63,8 @@ public class ModStubConfig {
 
         KNOCKBACK_SLICK_TIME = slickTime;
         WALL_CLIP_TIME = clipTime;
+
+        RAMP_JUMP_SCALE = rampJumpScale;
 
         INCREASED_FALL_DISTANCE = fallInc;
 
@@ -84,6 +90,9 @@ public class ModStubConfig {
 
         buf.writeInt (KNOCKBACK_SLICK_TIME);
         buf.writeInt (WALL_CLIP_TIME);
+
+        buf.writeDouble (RAMP_JUMP_SCALE);
+
         buf.writeDouble (INCREASED_FALL_DISTANCE);
     }
 
@@ -108,6 +117,8 @@ public class ModStubConfig {
 
                 buf.readInt (), // knockback slick ticks
                 buf.readInt (), // wall clip ticks
+
+                buf.readDouble (), // ramp jump scale factor
 
                 buf.readDouble (),   // fall dist increase
 

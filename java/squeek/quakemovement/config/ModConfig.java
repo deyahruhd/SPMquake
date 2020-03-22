@@ -51,6 +51,9 @@ public class ModConfig
 	private static final String WALL_CLIP_TIME = "maxWallClipTime";
 	private static final int WALL_CLIP_TIME_DEFAULT = 400;
 
+	private static final String RAMP_JUMP_SCALE = "rampJumpScaling";
+	private static final double RAMP_JUMP_SCALE_DEFAULT = 1.0;
+
 	private static final String ARMOR_REQ_NAME = "armorRequirement";
 	private static final String ARMOR_REQ_DEFAULT = "";
 
@@ -81,6 +84,7 @@ public class ModConfig
 				config.get(CATEGORY_MOVEMENT, OVERSPEED_EXHAUST_SCALE, OVERSPEED_EXHAUST_SCALE_DEFAULT, "minimum speed before receiving hunger costs from oversped jumps").getDouble(OVERSPEED_EXHAUST_SCALE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, KNOCKBACK_TIME, KNOCKBACK_TIME_DEFAULT, "number of milliseconds a player is slicked for after receiving knockback").getInt(KNOCKBACK_TIME_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, WALL_CLIP_TIME, WALL_CLIP_TIME_DEFAULT, "number of milliseconds during which a player's momentum is preserved after a jump").getInt(WALL_CLIP_TIME_DEFAULT),
+				config.get(CATEGORY_MOVEMENT, RAMP_JUMP_SCALE, RAMP_JUMP_SCALE_DEFAULT, "scaling of ramp jump speed after hitting stairs").setMinValue (0.0).setMaxValue (1.0).getDouble (RAMP_JUMP_SCALE_DEFAULT),
 				(float) (config.get(CATEGORY_MOVEMENT, INCREASED_FALL_DISTANCE_NAME, INCREASED_FALL_DISTANCE_DEFAULT, "increases the distance needed to fall in order to take fall damage; this is a server-side setting").getDouble(INCREASED_FALL_DISTANCE_DEFAULT)),
 				config.get(CATEGORY_MOVEMENT, ARMOR_REQ_NAME, ARMOR_REQ_DEFAULT, "the fully-qualified name of an armor piece that should activate the movement for a player (for example, \"minecraft:diamond_boots\")").getString()
 		);
@@ -103,6 +107,7 @@ public class ModConfig
 				VALUES.OVERSPEED_EXHAUSTION_SCALE,
 				VALUES.KNOCKBACK_SLICK_TIME,
 				VALUES.WALL_CLIP_TIME,
+				VALUES.RAMP_JUMP_SCALE,
 				VALUES.INCREASED_FALL_DISTANCE,
 				VALUES.ARMOR_REQ);
 		save ();
