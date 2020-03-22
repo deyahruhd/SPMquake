@@ -24,7 +24,6 @@ public class ConfigPacket implements IMessage, IMessageHandler <ConfigPacket, IM
     @Override
     @SideOnly (Side.CLIENT)
     public IMessage onMessage (final ConfigPacket packet, MessageContext ctx) {
-        System.out.println ("Received packet with armor \"" + packet.serverValues.ARMOR_REQ + "\"");
         Minecraft.getMinecraft ().addScheduledTask (new Runnable() {
             @Override
             public void run() {
