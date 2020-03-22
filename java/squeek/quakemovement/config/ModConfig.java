@@ -45,11 +45,11 @@ public class ModConfig
 	private static final String OVERSPEED_EXHAUST_SCALE = "overspeedScaling";
 	private static final double OVERSPEED_EXHAUST_SCALE_DEFAULT = 0.15D;
 
-	private static final String KNOCKBACK_TICKS = "maxKnockbackSlickTicks";
-	private static final int KNOCKBACK_TICKS_DEFAULT = 250;
+	private static final String KNOCKBACK_TIME = "maxKnockbackSlickTime";
+	private static final int KNOCKBACK_TIME_DEFAULT = 250;
 
-	private static final String WALL_CLIP_TICKS = "maxWallClipTicks";
-	private static final int WALL_CLIP_TICKS_DEFAULT = 400;
+	private static final String WALL_CLIP_TIME = "maxWallClipTime";
+	private static final int WALL_CLIP_TIME_DEFAULT = 400;
 
 	private static final String ARMOR_REQ_NAME = "armorRequirement";
 	private static final String ARMOR_REQ_DEFAULT = "";
@@ -79,8 +79,8 @@ public class ModConfig
 				config.get(CATEGORY_MOVEMENT, Q3_MAX_AIR_ACCEL_PER_TICK_NAME, Q3_MAX_AIR_ACCEL_PER_TICK_DEFAULT, "maximum speed attainable per tick when holding forward + a strafe key").getDouble(Q3_MAX_AIR_ACCEL_PER_TICK_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, OVERSPEED, OVERSPEED_DEFAULT, "minimum speed before receiving hunger costs from oversped jumps").getDouble(OVERSPEED_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, OVERSPEED_EXHAUST_SCALE, OVERSPEED_EXHAUST_SCALE_DEFAULT, "minimum speed before receiving hunger costs from oversped jumps").getDouble(OVERSPEED_EXHAUST_SCALE_DEFAULT),
-				config.get(CATEGORY_MOVEMENT, KNOCKBACK_TICKS, KNOCKBACK_TICKS_DEFAULT, "number of ticks a player is slicked for after receiving knockback").getInt(KNOCKBACK_TICKS_DEFAULT),
-				config.get(CATEGORY_MOVEMENT, WALL_CLIP_TICKS, WALL_CLIP_TICKS_DEFAULT, "number of ticks during which a player's momentum is preserved after a jump").getInt(WALL_CLIP_TICKS_DEFAULT),
+				config.get(CATEGORY_MOVEMENT, KNOCKBACK_TIME, KNOCKBACK_TIME_DEFAULT, "number of milliseconds a player is slicked for after receiving knockback").getInt(KNOCKBACK_TIME_DEFAULT),
+				config.get(CATEGORY_MOVEMENT, WALL_CLIP_TIME, WALL_CLIP_TIME_DEFAULT, "number of milliseconds during which a player's momentum is preserved after a jump").getInt(WALL_CLIP_TIME_DEFAULT),
 				(float) (config.get(CATEGORY_MOVEMENT, INCREASED_FALL_DISTANCE_NAME, INCREASED_FALL_DISTANCE_DEFAULT, "increases the distance needed to fall in order to take fall damage; this is a server-side setting").getDouble(INCREASED_FALL_DISTANCE_DEFAULT)),
 				config.get(CATEGORY_MOVEMENT, ARMOR_REQ_NAME, ARMOR_REQ_DEFAULT, "the fully-qualified name of an armor piece that should activate the movement for a player (for example, \"minecraft:diamond_boots\")").getString()
 		);
@@ -101,8 +101,8 @@ public class ModConfig
 				VALUES.Q3_MAX_AIR_ACCEL_PER_TICK,
 				VALUES.OVERSPEED,
 				VALUES.OVERSPEED_EXHAUSTION_SCALE,
-				VALUES.KNOCKBACK_SLICK_TICKS,
-				VALUES.WALL_CLIP_TICKS,
+				VALUES.KNOCKBACK_SLICK_TIME,
+				VALUES.WALL_CLIP_TIME,
 				VALUES.INCREASED_FALL_DISTANCE,
 				VALUES.ARMOR_REQ);
 		save ();

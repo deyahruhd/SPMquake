@@ -21,10 +21,10 @@ public class ModStubConfig {
     // set overspeed exhaustion scale to 0.0 to disable
     public final double OVERSPEED_EXHAUSTION_SCALE;
 
-    // number of ticks that a player will receive ground slick for after taking explosion knockback
-    public final int KNOCKBACK_SLICK_TICKS;
-    // number of ticks after a jump that the player will maintain their momentum into a wall
-    public final int WALL_CLIP_TICKS;
+    // number of milliseconds that a player will receive ground slick for after taking explosion knockback
+    public final int KNOCKBACK_SLICK_TIME;
+    // number of milliseconds after a jump that the player will maintain their momentum into a wall
+    public final int WALL_CLIP_TIME;
 
     public final double INCREASED_FALL_DISTANCE;
 
@@ -40,8 +40,8 @@ public class ModStubConfig {
                           double q3MaxAccel,
                           double overspeed,
                           double overspeedScale,
-                          int slickTicks,
-                          int clipTicks,
+                          int slickTime,
+                          int clipTime,
                           double fallInc,
                           String qualifiedArmorName) {
         ENABLED = enable;
@@ -57,8 +57,8 @@ public class ModStubConfig {
         OVERSPEED = overspeed;
         OVERSPEED_EXHAUSTION_SCALE = overspeedScale;
 
-        KNOCKBACK_SLICK_TICKS = slickTicks;
-        WALL_CLIP_TICKS = clipTicks;
+        KNOCKBACK_SLICK_TIME = slickTime;
+        WALL_CLIP_TIME = clipTime;
 
         INCREASED_FALL_DISTANCE = fallInc;
 
@@ -82,8 +82,8 @@ public class ModStubConfig {
         buf.writeDouble (OVERSPEED);
         buf.writeDouble (OVERSPEED_EXHAUSTION_SCALE);
 
-        buf.writeInt (KNOCKBACK_SLICK_TICKS);
-        buf.writeInt (WALL_CLIP_TICKS);
+        buf.writeInt (KNOCKBACK_SLICK_TIME);
+        buf.writeInt (WALL_CLIP_TIME);
         buf.writeDouble (INCREASED_FALL_DISTANCE);
     }
 

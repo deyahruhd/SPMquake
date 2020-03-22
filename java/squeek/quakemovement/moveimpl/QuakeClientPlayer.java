@@ -188,7 +188,7 @@ public class QuakeClientPlayer
 		// near you, right before you land on the ground, grants you a 50-200ms period of 0 friction. This can
 		// allow doubling or even tripling your speed with a well timed and quick circle jump.
 		// For now it's activated when receiving knockback from an explosion
-		if (player.onGround && (time - playerAirbornTime > ModConfig.VALUES.KNOCKBACK_SLICK_TICKS))
+		if (player.onGround && (time - playerAirbornTime > ModConfig.VALUES.KNOCKBACK_SLICK_TIME))
 		{
 			BlockPos groundPos = new BlockPos(MathHelper.floor(player.posX), MathHelper.floor(player.getEntityBoundingBox().minY) - 1, MathHelper.floor(player.posZ));
 			Block ground = player.world.getBlockState(groundPos).getBlock();
@@ -551,7 +551,7 @@ public class QuakeClientPlayer
 				quake_AirAccelerate(player, wishspeed, wishdir[0], wishdir[1], sidemove != 0.f, forwardmove != 0.f);
 			}
 
-			if (getSpeed (player) > 0.21540 && (System.currentTimeMillis () - playerGroundTouchTime > ModConfig.VALUES.WALL_CLIP_TICKS)
+			if (getSpeed (player) > 0.21540 && (System.currentTimeMillis () - playerGroundTouchTime > ModConfig.VALUES.WALL_CLIP_TIME)
 					&& player.onGround && ! onGroundForReal)
 				playerGroundTouchTime = System.currentTimeMillis ();
 
@@ -587,7 +587,7 @@ public class QuakeClientPlayer
 			}
 
 			// Wall clip
-            if ((System.currentTimeMillis () - playerGroundTouchTime <= ModConfig.VALUES.WALL_CLIP_TICKS)) {
+            if ((System.currentTimeMillis () - playerGroundTouchTime <= ModConfig.VALUES.WALL_CLIP_TIME)) {
 				player.setVelocity(previousVel.x, player.motionY, previousVel.z);
 				previousVel = new Vec3d(previousVel.x, player.motionY, previousVel.z);
 			}
