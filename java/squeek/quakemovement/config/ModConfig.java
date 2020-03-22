@@ -21,7 +21,7 @@ public class ModConfig
 	private static final String ACCELERATE_NAME = "groundAccelerate";
 	private static final double ACCELERATE_DEFAULT = 100.0D;
 
-	private static final String SLIDE_ACCELERATE_NAME = "groundAccelerate";
+	private static final String SLIDE_ACCELERATE_NAME = "slideAccelerate";
 	private static final double SLIDE_ACCELERATE_DEFAULT = 3000.0D;
 
 	private static final String Q1_AIR_ACCELERATE_NAME = "q1airAccelerate";
@@ -52,7 +52,7 @@ public class ModConfig
 	private static final int WALL_CLIP_TIME_DEFAULT = 400;
 
 	private static final String RAMP_JUMP_SCALE = "rampJumpScaling";
-	private static final double RAMP_JUMP_SCALE_DEFAULT = 1.0;
+	private static final double RAMP_JUMP_SCALE_DEFAULT = 0.80;
 
 	private static final String ARMOR_REQ_NAME = "armorRequirement";
 	private static final String ARMOR_REQ_DEFAULT = "";
