@@ -12,6 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
@@ -28,6 +29,7 @@ import squeek.quakemovement.config.ModConfig;
 import squeek.quakemovement.handler.ConfigPacket;
 import squeek.quakemovement.handler.DrawHUDHandler;
 import squeek.quakemovement.handler.NetworkHandler;
+import squeek.quakemovement.moveimpl.QuakeClientPlayer;
 
 import java.util.ArrayList;
 
@@ -74,6 +76,12 @@ public class ModQuakeMovement
 	@SubscribeEvent
 	public void playerLoginServer(final PlayerEvent.PlayerLoggedInEvent event) {
 		NetworkHandler.INSTANCE.sendTo (new ConfigPacket (ModConfig.VALUES), (EntityPlayerMP) event.player);
+	}
+
+	@SubscribeEvent
+	public void playerJump (LivingEvent.LivingJumpEvent event) {
+		if (event.getEntity () instanceof EntityPlayer && event.getEntity().world.isRemote && shouldDoQuakeMovement ((EntityPlayer) event.getEntity()))
+			QuakeClientPlayer.doHungerJump ((EntityPlayer) event.getEntity ());
 	}
 
 	public static boolean shouldDoQuakeMovement (EntityPlayer player) {

@@ -306,18 +306,8 @@ public class QuakeClientPlayer
 		playerAirbornTime = System.currentTimeMillis();
 	}
 
-	private static void doHungerJump (EntityPlayer e) {
+	public static void doHungerJump (EntityPlayer e) {
 		NetworkHandler.INSTANCE.sendToServer (new HungerJumpPacket (Minecraft.getMinecraft ().player));
-	}
-
-	public static void applyJumpVelToEntity (EntityLivingBase e, double speed) {
-		if (!(e instanceof EntityPlayer) || !ModQuakeMovement.shouldDoQuakeMovement((EntityPlayer) e))
-			e.motionY = speed;
-		else if (e.onGround) {
-			e.motionY = speed;
-
-			doHungerJump ((EntityPlayer) e);
-		}
 	}
 
 	public static void setEntityVelocity(Entity entity, double x, double y, double z) {
