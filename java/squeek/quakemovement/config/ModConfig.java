@@ -39,6 +39,12 @@ public class ModConfig
 	private static final String Q3_MAX_AIR_ACCEL_PER_TICK_NAME = "q3maxAirAccelerationPerTick";
 	private static final double Q3_MAX_AIR_ACCEL_PER_TICK_DEFAULT = 500.0D;
 
+	private static final String CPM_AIR_STEER_ACCELERATE_NAME = "airSteerAccelerate";
+	private static final double CPM_AIR_STEER_ACCELERATE_DEFAULT = 6.0D;
+
+	private static final String CPM_AIR_UNDERSTEER_NAME = "airUndersteer";
+	private static final double CPM_AIR_UNDERSTEER_DEFAULT = 0.8D;
+
 	private static final String OVERSPEED = "overspeed";
 	private static final double OVERSPEED_DEFAULT = 6.32D;
 
@@ -80,6 +86,8 @@ public class ModConfig
 				config.get(CATEGORY_MOVEMENT, Q3_AIR_ACCELERATE_NAME, Q3_AIR_ACCELERATE_DEFAULT, "acceleration applied when holding forward + a strafe key").getDouble(Q3_AIR_ACCELERATE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, Q1_MAX_AIR_ACCEL_PER_TICK_NAME, Q1_MAX_AIR_ACCEL_PER_TICK_DEFAULT, "maximum speed attainable per tick when holding only a strafe key").getDouble(Q1_MAX_AIR_ACCEL_PER_TICK_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, Q3_MAX_AIR_ACCEL_PER_TICK_NAME, Q3_MAX_AIR_ACCEL_PER_TICK_DEFAULT, "maximum speed attainable per tick when holding forward + a strafe key").getDouble(Q3_MAX_AIR_ACCEL_PER_TICK_DEFAULT),
+				config.get(CATEGORY_MOVEMENT, CPM_AIR_STEER_ACCELERATE_NAME, CPM_AIR_STEER_ACCELERATE_DEFAULT, "acceleration applied while holding only forward").getDouble(CPM_AIR_STEER_ACCELERATE_DEFAULT),
+				config.get(CATEGORY_MOVEMENT, CPM_AIR_UNDERSTEER_NAME, CPM_AIR_UNDERSTEER_DEFAULT, "W steering turn radius factor; lower values result in easier W turning, but result in more understeering with sharp turns").setMinValue (0.0).setMaxValue (1.0).getDouble(CPM_AIR_STEER_ACCELERATE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, OVERSPEED, OVERSPEED_DEFAULT, "minimum speed before receiving hunger costs from oversped jumps").getDouble(OVERSPEED_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, OVERSPEED_EXHAUST_SCALE, OVERSPEED_EXHAUST_SCALE_DEFAULT, "scaling of hunger cost from oversped jumps").getDouble(OVERSPEED_EXHAUST_SCALE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, KNOCKBACK_TIME, KNOCKBACK_TIME_DEFAULT, "number of milliseconds a player is slicked for after receiving knockback").getInt(KNOCKBACK_TIME_DEFAULT),
@@ -103,6 +111,8 @@ public class ModConfig
 				VALUES.Q3_AIR_ACCELERATE,
 				VALUES.Q1_MAX_AIR_ACCEL_PER_TICK,
 				VALUES.Q3_MAX_AIR_ACCEL_PER_TICK,
+				VALUES.CPM_AIR_STEER_ACCELERATE,
+				VALUES.CPM_AIR_UNDERSTEER,
 				VALUES.OVERSPEED,
 				VALUES.OVERSPEED_EXHAUSTION_SCALE,
 				VALUES.KNOCKBACK_SLICK_TIME,

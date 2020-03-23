@@ -14,6 +14,8 @@ public class ModStubConfig {
     public final double Q1_MAX_AIR_ACCEL_PER_TICK;
     public final double Q3_MAX_AIR_ACCEL_PER_TICK;
 
+    public final double CPM_AIR_STEER_ACCELERATE;
+    public final double CPM_AIR_UNDERSTEER;
 
     // overspeed for the hunger jump caps in blocks/sec, if the player is above this cap then
     // they will receive exhaustion on a scale of log squared speed, multiplied by the exhaustion scale
@@ -41,6 +43,8 @@ public class ModStubConfig {
                           double q3Accel,
                           double q1MaxAccel,
                           double q3MaxAccel,
+                          double cpmAirSteerAccel,
+                          double cpmAirUndersteer,
                           double overspeed,
                           double overspeedScale,
                           int slickTime,
@@ -57,6 +61,9 @@ public class ModStubConfig {
         Q3_AIR_ACCELERATE = q3Accel;
         Q1_MAX_AIR_ACCEL_PER_TICK = q1MaxAccel;
         Q3_MAX_AIR_ACCEL_PER_TICK = q3MaxAccel;
+
+        CPM_AIR_STEER_ACCELERATE = cpmAirSteerAccel;
+        CPM_AIR_UNDERSTEER = cpmAirUndersteer;
 
         OVERSPEED = overspeed;
         OVERSPEED_EXHAUSTION_SCALE = overspeedScale;
@@ -85,6 +92,9 @@ public class ModStubConfig {
         buf.writeDouble (Q1_MAX_AIR_ACCEL_PER_TICK);
         buf.writeDouble (Q3_MAX_AIR_ACCEL_PER_TICK);
 
+        buf.writeDouble (CPM_AIR_STEER_ACCELERATE);
+        buf.writeDouble (CPM_AIR_UNDERSTEER);
+
         buf.writeDouble (OVERSPEED);
         buf.writeDouble (OVERSPEED_EXHAUSTION_SCALE);
 
@@ -111,6 +121,9 @@ public class ModStubConfig {
                 buf.readDouble (),  // q3 air accel
                 buf.readDouble (),  // q1 max air accel
                 buf.readDouble (),  // q3 max air accel
+
+                buf.readDouble (),  // cpm air steer
+                buf.readDouble (),  // cpm air understeer
 
                 buf.readDouble (),  // overspeed minimum
                 buf.readDouble (),  // overspeed scale factor

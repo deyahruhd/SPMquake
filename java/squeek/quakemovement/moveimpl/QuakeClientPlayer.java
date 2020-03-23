@@ -548,7 +548,7 @@ public class QuakeClientPlayer
 			else
 			{
 				playerSlide = -1.f;
-				quake_AirAccelerate(player, wishspeed, wishdir[0], wishdir[1], sidemove != 0.f, forwardmove != 0.f);
+				quake_AirAccelerate(player, wishspeed, 0.0f, wishdir[0], wishdir[1], sidemove != 0.f, forwardmove != 0.f);
 			}
 
 			if (getSpeed (player) > 0.21540 && (System.currentTimeMillis () - playerGroundTouchTime > ModConfig.VALUES.WALL_CLIP_TIME)
@@ -635,7 +635,39 @@ public class QuakeClientPlayer
 		}
 	}
 
-	private static void quake_AirAccelerate(EntityPlayer player, float wishspeed, double wishX, double wishZ, boolean strafe, boolean forward)
+	private static void quake_CPMAirSteer(EntityPlayer player, double wishspeed, double wishX, double wishZ) {
+		if(wishspeed <= 0.0)
+			return;
+
+		Vec3d playerVel = new Vec3d (player.motionX, 0.0, player.motionZ);
+		double currspeed = playerVel.length ();
+
+		if (wishspeed > currspeed * 1.01f ) {
+			double accelspeed = currspeed + ModConfig.VALUES.Q3_AIR_ACCELERATE * quake_getMoveSpeed (player);
+			if (accelspeed < wishspeed)
+				wishspeed = accelspeed;
+		}
+
+		Vec3d wishVel = new Vec3d (wishX, 0.0, wishZ).scale (wishspeed);
+		Vec3d accelDir = wishVel.subtract (playerVel);
+		double addspeed = accelDir.length ();
+		accelDir = accelDir.normalize ();
+
+		double accelspeed = ModConfig.VALUES.CPM_AIR_STEER_ACCELERATE * quake_getMoveSpeed (player);
+		if (accelspeed > addspeed)
+			accelspeed = addspeed;
+
+		Vec3d currDir = playerVel.normalize ();
+		double dot = accelDir.dotProduct (currDir);
+
+		if (dot < 0)
+			accelDir = accelDir.add (currDir.scale (- (1.0f - ModConfig.VALUES.CPM_AIR_UNDERSTEER) * dot));
+
+		player.motionX += accelspeed * accelDir.x;
+		player.motionZ += accelspeed * accelDir.z;
+	}
+
+	private static void quake_AirAccelerate(EntityPlayer player, float wishspeed, float cap, double wishX, double wishZ, boolean strafe, boolean forward)
 	{
 		double addspeed, accelspeed, currentspeed;
 
@@ -646,6 +678,14 @@ public class QuakeClientPlayer
 		if (strafe && !forward) {
 			dynamicAccel = (float) ModConfig.VALUES.Q1_AIR_ACCELERATE;
 			maxAirAcceleration = (float) ModConfig.VALUES.Q1_MAX_AIR_ACCEL_PER_TICK;
+		} else if (! strafe && forward) {
+			cap = (float) MathHelper.absMax ((float) getSpeed (player), quake_getMoveSpeed (player));
+			if (cap <= quake_getMoveSpeed (player))
+				dynamicAccel = 1.0f;
+			else
+				dynamicAccel = (float) ModConfig.VALUES.CPM_AIR_STEER_ACCELERATE;
+
+			wishspd = cap;
 		}
 
 		if (wishspd > maxAirAcceleration)
@@ -672,6 +712,12 @@ public class QuakeClientPlayer
 		// Adjust pmove vel.
 		player.motionX += accelspeed * wishX;
 		player.motionZ += accelspeed * wishZ;
+
+		if (cap > 0.f && (player.motionX * player.motionX + player.motionZ * player.motionZ) > (cap * cap)) {
+			Vec3d hardCappedVel = new Vec3d (player.motionX, 0.0, player.motionZ).normalize().scale (cap);
+			player.motionX = hardCappedVel.x;
+			player.motionZ = hardCappedVel.z;
+		}
 	}
 
 	/* =================================================
