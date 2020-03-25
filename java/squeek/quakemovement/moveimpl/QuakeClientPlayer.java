@@ -13,6 +13,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.play.server.SPacketExplosion;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -280,7 +281,8 @@ public class QuakeClientPlayer
 		}
 	}
 
-	public static void applyExplosionToSPPlayer (Explosion e, float str) {
+	public static void applyExplosionToSPPlayer (Explosion e, SPacketExplosion packet) {
+		float str = packet.getStrength ();
 		EntityPlayerSP player = Minecraft.getMinecraft().player;
 		Vec3d ePos = e.getPosition ();
 		float sqDist = (float) player.getDistanceSq (ePos.x, ePos.y, ePos.z);

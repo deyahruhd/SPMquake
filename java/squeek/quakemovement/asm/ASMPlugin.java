@@ -13,6 +13,7 @@ import java.util.Map;
 public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 {
 	public static boolean isObfuscated = false;
+	public static boolean isClient = false;
 	private static String CLASS_ENTITY_PLAYER      		= "net.minecraft.entity.player.EntityPlayer";
 	private static String CLASS_ENTITY 			   		= "net.minecraft.entity.Entity";
 	private static String CLASS_NET_HANDLER_PLAY_CLIENT = "net.minecraft.client.network.NetHandlerPlayClient";
@@ -24,8 +25,7 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes)
 	{
-		if (transformedName.equals(CLASS_ENTITY_PLAYER))
-		{
+		if (transformedName.equals(CLASS_ENTITY_PLAYER)) {
 			ClassNode classNode = readClassFromBytes(bytes);
 			MethodNode method;
 
@@ -73,9 +73,7 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 			injectSimpleHook(method, findLastInstructionWithOpcode(method, Opcodes.RETURN), CLASS_QUAKE_SERVER_PLAYER, "afterFall", toMethodDescriptor("V", CLASS_ENTITY_PLAYER, "F", "F"), loadParameters);
 
 			return writeClassToBytes(classNode);
-		}
-		else if (transformedName.equals(CLASS_ENTITY))
-		{
+		} else if (transformedName.equals(CLASS_ENTITY)) {
 			ClassNode classNode = readClassFromBytes(bytes);
 			MethodNode method;
 
@@ -91,25 +89,28 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 			loadParameters.add(new VarInsnNode(Opcodes.FLOAD, 4));
 			injectStandardHook(method, findFirstInstruction(method), CLASS_QUAKE_CLIENT_PLAYER, "moveRelativeBase", toMethodDescriptor("Z", CLASS_ENTITY, "F", "F", "F", "F"), loadParameters);
 
-			return writeClassToBytes(classNode);
-		}
-		else if (transformedName.equals(CLASS_NET_HANDLER_PLAY_CLIENT))
-		{
+			return writeClassToBytes (classNode);
+		} else if (transformedName.equals(CLASS_NET_HANDLER_PLAY_CLIENT)) {
 			ClassNode classNode = readClassFromBytes(bytes);
 			MethodNode method;
 
-			method = findMethodNodeOfClass(classNode, isObfuscated ? "a" : "handleEntityVelocity", "(Lnet/minecraft/network/play/server/SPacketEntityVelocity;)V");
+			String packetVelName = isObfuscated ? "kf" : "net/minecraft/network/play/server/SPacketEntityVelocity";
+			String explosionName = isObfuscated ? "amp" : "net/minecraft/world/Explosion";
+			String entityName    = isObfuscated ? "vg" : "net/minecraft/entity/Entity";
+			String packetExpName = isObfuscated ? "ja" : "net/minecraft/network/play/server/SPacketExplosion";
+
+			method = findMethodNodeOfClass(classNode, isObfuscated ? "a" : "handleEntityVelocity", "(L" + packetVelName + ";)V");
 			if (method == null)
-				throw new RuntimeException("could not find NetHandlerPlayClient.handleEntityVelocity");
+				throw new RuntimeException("could not find NetHandlerPlayClient.handleExplosion");
 
 			AbstractInsnNode setVel = findLastInstructionWithOpcode (method, Opcodes.INVOKEVIRTUAL);
 
-			method.instructions.insertBefore(setVel, new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_QUAKE_CLIENT_PLAYER), "setEntityVelocity", "(Lnet/minecraft/entity/Entity;DDD)V", false));
+			method.instructions.insertBefore(setVel, new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_QUAKE_CLIENT_PLAYER), "setEntityVelocity", "(L" + entityName + ";DDD)V", false));
 			method.instructions.remove (setVel);
 
 			MethodNode method2;
 
-			method2 = findMethodNodeOfClass(classNode, isObfuscated ? "a" : "handleExplosion", "(Lnet/minecraft/network/play/server/SPacketExplosion;)V");
+			method2 = findMethodNodeOfClass(classNode, isObfuscated ? "a" : "handleExplosion", "(L" + packetExpName + ";)V");
 			if (method2 == null)
 				throw new RuntimeException("could not find NetHandlerPlayClient.handleExplosion");
 
@@ -120,13 +121,11 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 			InsnList loadParameters = new InsnList();
 			loadParameters.add(new VarInsnNode(Opcodes.ALOAD, 2));
 			loadParameters.add(new VarInsnNode(Opcodes.ALOAD, 1));
-			loadParameters.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, toInternalClassName(CLASS_SPACKET_EXPLOSION), isObfuscated ? "i" : "getStrength", "()F", false));
-			loadParameters.add(new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_QUAKE_CLIENT_PLAYER), "applyExplosionToSPPlayer", "(Lnet/minecraft/world/Explosion;F)V", false));
+			loadParameters.add(new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_QUAKE_CLIENT_PLAYER), "applyExplosionToSPPlayer", "(L" + explosionName + ";L" + packetExpName + ";)V", false));
 			loadParameters.add(new InsnNode(Opcodes.RETURN));
 
-			method.instructions.insertBefore (doExplosionB, loadParameters);
-
-			return writeClassToBytes(classNode);
+			method2.instructions.insertBefore (doExplosionB, loadParameters);
+			return writeClassToBytes (classNode);
 		}
 		return bytes;
 	}
