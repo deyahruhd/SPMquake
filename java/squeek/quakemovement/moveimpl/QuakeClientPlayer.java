@@ -291,15 +291,8 @@ public class QuakeClientPlayer
 			float normalizedDist = MathHelper.sqrt (sqDist) / str;
 			Vec3d diff = ePos.subtract (pPos).normalize();
 
-			boolean specialCondition = false;
-
-			if (specialCondition) {
-				normalizedDist = 1.f - (float) Math.pow (normalizedDist, 4); // Curved accordingly
-				normalizedDist *= -0.5f;
-			} else {
-				normalizedDist = 1.f - (float) Math.pow (normalizedDist, 2); // Curved accordingly
-				normalizedDist *= -0.25f;
-			}
+			normalizedDist = 1.f - (normalizedDist * normalizedDist * normalizedDist); // Curved accordingly
+			normalizedDist *= -0.333f;
 
 			diff = diff.scale (str * normalizedDist);
 
