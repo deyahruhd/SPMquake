@@ -282,13 +282,14 @@ public class QuakeClientPlayer
 	}
 
 	public static void applyExplosionToSPPlayer (Explosion e, SPacketExplosion packet) {
-		float str = packet.getStrength ();
+		float str = packet.getStrength () * 1.5f;
 		EntityPlayerSP player = Minecraft.getMinecraft().player;
 		Vec3d ePos = e.getPosition ();
-		float sqDist = (float) player.getDistanceSq (ePos.x, ePos.y, ePos.z);
+		Vec3d pPos = new Vec3d (player.posX, player.posY, player.posZ).add (0.0, player.getEyeHeight () / 2.0, 0.0);
+		float sqDist = (float) ePos.subtract(pPos).lengthSquared ();
 		if (sqDist <= (str * str)) {
 			float normalizedDist = MathHelper.sqrt (sqDist) / str;
-			Vec3d diff = ePos.subtract (new Vec3d (player.posX, player.posY, player.posZ)).normalize();
+			Vec3d diff = ePos.subtract (pPos).normalize();
 
 			boolean specialCondition = false;
 
@@ -304,8 +305,8 @@ public class QuakeClientPlayer
 
 			player.addVelocity (diff.x, diff.y, diff.z);
 
+			playerAirbornTime = System.currentTimeMillis();
 		}
-		playerAirbornTime = System.currentTimeMillis();
 	}
 
 	public static void doHungerJump (EntityPlayer e) {
