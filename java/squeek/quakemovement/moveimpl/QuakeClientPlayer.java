@@ -282,7 +282,7 @@ public class QuakeClientPlayer
 	}
 
 	public static void applyExplosionToSPPlayer (Explosion e, SPacketExplosion packet) {
-		float str = packet.getStrength () * 1.5f;
+		float str = packet.getStrength ();
 		EntityPlayerSP player = Minecraft.getMinecraft().player;
 		Vec3d ePos = e.getPosition ();
 		Vec3d pPos = new Vec3d (player.posX, player.posY, player.posZ).add (0.0, player.getEyeHeight () / 2.0, 0.0);
@@ -296,7 +296,7 @@ public class QuakeClientPlayer
 
 			diff = diff.scale (str * normalizedDist);
 
-			player.addVelocity (diff.x, diff.y, diff.z);
+			player.addVelocity (diff.x * 0.66f, diff.y, diff.z * 0.66f);
 
 			playerAirbornTime = System.currentTimeMillis();
 		}
