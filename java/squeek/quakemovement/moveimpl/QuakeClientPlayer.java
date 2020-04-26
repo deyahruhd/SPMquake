@@ -364,8 +364,6 @@ public class QuakeClientPlayer
 
 			float smoothTime = (float) (System.nanoTime () - startTime) / 1000000000.f;
 
-			System.out.println (smoothTime);
-
 			speedScale = (float) (speedScale + (rawSpeedScale - speedScale) * 0.008);
 			linearSpeedScale = (float) (linearSpeedScale + (getSpeed (entityplayer) - linearSpeedScale) * 0.008);
 
