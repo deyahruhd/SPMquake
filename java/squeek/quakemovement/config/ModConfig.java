@@ -22,10 +22,10 @@ public class ModConfig
 	private static final double ACCELERATE_DEFAULT = 100.0D;
 
 	private static final String SLIDE_ACCELERATE_NAME = "slideAccelerate";
-	private static final double SLIDE_ACCELERATE_DEFAULT = 3000.0D;
+	private static final double SLIDE_ACCELERATE_DEFAULT = 6.0D;
 
 	private static final String Q1_AIR_ACCELERATE_NAME = "q1airAccelerate";
-	private static final double Q1_AIR_ACCELERATE_DEFAULT = 6.0D;
+	private static final double Q1_AIR_ACCELERATE_DEFAULT = 12.0D;
 
 	private static final String Q3_AIR_ACCELERATE_NAME = "q3airAccelerate";
 	private static final double Q3_AIR_ACCELERATE_DEFAULT = 1.0D;
@@ -34,13 +34,13 @@ public class ModConfig
 	private static final double INCREASED_FALL_DISTANCE_DEFAULT = 0.0D;
 
 	private static final String Q1_MAX_AIR_ACCEL_PER_TICK_NAME = "q1maxAirAccelerationPerTick";
-	private static final double Q1_MAX_AIR_ACCEL_PER_TICK_DEFAULT = 0.05D;
+	private static final double Q1_MAX_AIR_ACCEL_PER_TICK_DEFAULT = 0.03333333D;
 
 	private static final String Q3_MAX_AIR_ACCEL_PER_TICK_NAME = "q3maxAirAccelerationPerTick";
-	private static final double Q3_MAX_AIR_ACCEL_PER_TICK_DEFAULT = 500.0D;
+	private static final double Q3_MAX_AIR_ACCEL_PER_TICK_DEFAULT = Double.MAX_VALUE;
 
 	private static final String CPM_AIR_STEER_ACCELERATE_NAME = "airSteerAccelerate";
-	private static final double CPM_AIR_STEER_ACCELERATE_DEFAULT = 6.0D;
+	private static final double CPM_AIR_STEER_ACCELERATE_DEFAULT = 12.0D;
 
 	private static final String CPM_AIR_UNDERSTEER_NAME = "airUndersteer";
 	private static final double CPM_AIR_UNDERSTEER_DEFAULT = 0.8D;
@@ -58,7 +58,7 @@ public class ModConfig
 	private static final int WALL_CLIP_TIME_DEFAULT = 400;
 
 	private static final String RAMP_JUMP_SCALE = "rampJumpScaling";
-	private static final double RAMP_JUMP_SCALE_DEFAULT = 0.80;
+	private static final double RAMP_JUMP_SCALE_DEFAULT = 0.98;
 
 	private static final String ARMOR_REQ_NAME = "armorRequirement";
 	private static final String ARMOR_REQ_DEFAULT = "";
