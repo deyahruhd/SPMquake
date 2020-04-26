@@ -9,6 +9,7 @@ import net.minecraft.block.BlockStairs;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MoverType;
@@ -339,6 +340,65 @@ public class QuakeClientPlayer
 		}
 
 		return (stairNormal == Vec3d.ZERO) ? null : stairNormal.normalize ();
+	}
+
+	private static double scaledPlayerWalkDist = -1.f;
+	private static float speedScale = 0.f;
+	private static float linearSpeedScale = 0.f;
+	private static long startTime = System.nanoTime ();
+
+	private static double logScale (double x, double pow) {
+		return (Math.log (x + Math.pow ((1.0 / Math.E), pow)) + pow) / pow;
+	}
+
+	public static boolean applyNormalBobbing(float partialTicks)
+	{
+		Entity renderEntity = Minecraft.getMinecraft().getRenderViewEntity ();
+
+		return renderEntity instanceof EntityPlayer && ModQuakeMovement.shouldDoQuakeMovement ((EntityPlayer) renderEntity);
+	}
+
+	public static boolean applyCustomBobbing (float partialTicks, boolean doSpeedSway) {
+		Entity renderEntity = Minecraft.getMinecraft().getRenderViewEntity ();
+		if (renderEntity instanceof EntityPlayer && ModQuakeMovement.shouldDoQuakeMovement ((EntityPlayer) renderEntity)) {
+			EntityPlayer entityplayer = (EntityPlayer) renderEntity;
+			double playerSpeed = getSpeed (entityplayer);
+			float rawSpeedScale = (entityplayer.onGround && ! entityplayer.isSneaking ()) ? (float) (logScale (playerSpeed, 2.0) * 2.0) : 0.f;
+
+			float smoothTime = (float) (System.nanoTime () - startTime) / 1000000000.f;
+
+			System.out.println (smoothTime);
+
+			speedScale = (float) (speedScale + (rawSpeedScale - speedScale) * 0.008);
+			linearSpeedScale = (float) (linearSpeedScale + (getSpeed (entityplayer) - linearSpeedScale) * 0.008);
+
+			if (scaledPlayerWalkDist < 0.0 || Double.isNaN (scaledPlayerWalkDist))
+				scaledPlayerWalkDist = entityplayer.prevDistanceWalkedModified;
+
+			float delta = (float) (entityplayer.distanceWalkedModified - entityplayer.prevDistanceWalkedModified);
+			float scaledDelta = (float) logScale (delta, 6.0);
+			float f1 = -(float) (scaledPlayerWalkDist + scaledDelta * partialTicks) * 0.006f * 0.8f;
+			scaledPlayerWalkDist += scaledDelta;
+
+			float speedSwayX = (float) Math.cos (smoothTime * 0.31 * Math.PI) * linearSpeedScale * 8.4f;
+			float speedSwayY = (float) Math.sin (smoothTime * 0.42 * Math.PI) * linearSpeedScale * 5.4f;
+
+			if (! doSpeedSway) {
+				speedSwayX = 0.0F;
+				speedSwayY = 0.0F;
+			}
+
+			float f2 = entityplayer.prevCameraYaw + (entityplayer.cameraYaw - entityplayer.prevCameraYaw) * partialTicks;
+			float f3 = entityplayer.prevCameraPitch + (entityplayer.cameraPitch - entityplayer.prevCameraPitch) * partialTicks;
+			GlStateManager.translate(speedScale * MathHelper.sin(f1 * (float)Math.PI) * f2 * 1.F,
+									 Math.abs(speedScale * MathHelper.cos(f1 * (float)Math.PI) * f2) - (speedScale * 0.075),
+					              0.0F);
+			GlStateManager.rotate((speedScale * MathHelper.sin(f1 * (float)Math.PI * 0.8f) * f2 * 3.0F), 0.0F, 0.0F, 1.0F);
+			GlStateManager.rotate((Math.abs(speedScale * MathHelper.cos(f1 * (float)Math.PI - 0.2F) * f2) * 5.0F), 1.0F, 0.0F, 0.0F);
+			GlStateManager.rotate(speedSwayX, 0.0F, 1.0F, 0.0F);
+			GlStateManager.rotate(f3 + speedSwayY, 1.0F, 0.0F, 0.0F);
+		}
+		return false;
 	}
 
 	/* =================================================

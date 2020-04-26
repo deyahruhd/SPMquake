@@ -16,6 +16,7 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 	public static boolean isClient = false;
 	private static String CLASS_ENTITY_PLAYER      		= "net.minecraft.entity.player.EntityPlayer";
 	private static String CLASS_ENTITY 			   		= "net.minecraft.entity.Entity";
+	private static String CLASS_ENTITY_RENDERER         = "net.minecraft.client.renderer.EntityRenderer";
 	private static String CLASS_NET_HANDLER_PLAY_CLIENT = "net.minecraft.client.network.NetHandlerPlayClient";
 	private static String CLASS_SPACKET_EXPLOSION 		= "net.minecraft.network.play.server.SPacketExplosion";
 
@@ -126,7 +127,76 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 
 			method2.instructions.insertBefore (doExplosionB, loadParameters);
 			return writeClassToBytes (classNode);
+		} else if (transformedName.equals (CLASS_ENTITY_RENDERER)) {
+			ClassNode classNode = readClassFromBytes(bytes);
+
+
+
+
+
+			MethodNode applyBobbing = findMethodNodeOfClass(classNode, isObfuscated ? "f" : "applyBobbing", "(F)V");
+			if (applyBobbing == null)
+				throw new RuntimeException("could not find EntityRenderer.applyBobbing");
+
+			InsnList loadParameters = new InsnList ();
+			loadParameters.add (new VarInsnNode (Opcodes.FLOAD, 1));
+			injectStandardHook (applyBobbing, applyBobbing.instructions.getFirst (), CLASS_QUAKE_CLIENT_PLAYER, "applyNormalBobbing", "(F)Z", loadParameters);
+
+
+
+
+
+			MethodNode setupCameraTransform = findMethodNodeOfClass(classNode, isObfuscated ? "a" : "setupCameraTransform", "(FI)V");
+			if (setupCameraTransform == null)
+				throw new RuntimeException("could not find EntityRenderer.setupCameraTransform");
+
+			InsnList loadParameters1 = new InsnList ();
+			loadParameters1.add (new VarInsnNode (Opcodes.FLOAD, 1));
+			loadParameters1.add (new InsnNode (Opcodes.ICONST_0));
+
+			AbstractInsnNode firstBobbingCall = getOrFindMethodInsn (setupCameraTransform.instructions.getFirst (), isObfuscated ? "f" : "applyBobbing", "(F)V", false);
+
+			if (firstBobbingCall == null)
+				throw new RuntimeException("bobbing call was not found in setupCameraTransform");
+
+			injectStandardHook (setupCameraTransform, firstBobbingCall.getNext (), CLASS_QUAKE_CLIENT_PLAYER, "applyCustomBobbing", "(FZ)Z",
+					loadParameters1);
+
+
+
+
+
+			MethodNode renderHand = findMethodNodeOfClass(classNode, isObfuscated ? "b" : "renderHand", "(FI)V");
+			if (renderHand == null)
+				throw new RuntimeException("could not find EntityRenderer.renderHand");
+
+			InsnList loadParameters2 = new InsnList ();
+			loadParameters2.add (new VarInsnNode (Opcodes.FLOAD, 1));
+			loadParameters2.add (new InsnNode (Opcodes.ICONST_1));
+
+			AbstractInsnNode secondBobbingCall = getOrFindMethodInsn (renderHand.instructions.getFirst (), isObfuscated ? "f" : "applyBobbing", "(F)V", false);
+
+			if (secondBobbingCall == null)
+				throw new RuntimeException("1st bobbing call was not found in renderHand");
+
+			injectStandardHook (renderHand, secondBobbingCall.getNext (), CLASS_QUAKE_CLIENT_PLAYER, "applyCustomBobbing", "(FZ)Z",
+					loadParameters2);
+
+			AbstractInsnNode lastBobbingCall = getOrFindMethodInsn (renderHand.instructions.getLast (), isObfuscated ? "f" : "applyBobbing", "(F)V", true);
+
+			if (lastBobbingCall == null)
+				throw new RuntimeException("2nd bobbing call was not found in renderHand");
+
+			InsnList loadParameters3 = new InsnList ();
+			loadParameters3.add (new VarInsnNode (Opcodes.FLOAD, 1));
+			loadParameters3.add (new InsnNode (Opcodes.ICONST_1));
+
+			injectStandardHook (renderHand, lastBobbingCall.getNext (), CLASS_QUAKE_CLIENT_PLAYER, "applyCustomBobbing", "(FZ)Z",
+					loadParameters3);
+
+			return writeClassToBytes (classNode);
 		}
+
 		return bytes;
 	}
 
@@ -258,6 +328,16 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 		for (AbstractInsnNode instruction = firstInsnToCheck; instruction != null; instruction = reverseDirection ? instruction.getPrevious() : instruction.getNext())
 		{
 			if (instruction.getOpcode() == opcode)
+				return instruction;
+		}
+		return null;
+	}
+
+	public static AbstractInsnNode getOrFindMethodInsn(AbstractInsnNode firstInsnToCheck, String methodName, String methodDesc, boolean reverseDirection)
+	{
+		for (AbstractInsnNode instruction = firstInsnToCheck; instruction != null; instruction = reverseDirection ? instruction.getPrevious() : instruction.getNext())
+		{
+			if (instruction instanceof MethodInsnNode && ((MethodInsnNode) instruction).name.equals (methodName) && ((MethodInsnNode) instruction).desc.equals (methodDesc))
 				return instruction;
 		}
 		return null;
