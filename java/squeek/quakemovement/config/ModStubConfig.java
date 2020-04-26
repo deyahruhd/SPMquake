@@ -8,7 +8,6 @@ public class ModStubConfig {
 
     // vars for ground and air acceleration
     public final double ACCELERATE;
-    public final double SLIDE_ACCELERATE;
     public final double Q1_AIR_ACCELERATE;
     public final double Q3_AIR_ACCELERATE;
     public final double Q1_MAX_AIR_ACCEL_PER_TICK;
@@ -38,7 +37,6 @@ public class ModStubConfig {
     public ModStubConfig (boolean enable,
                           int jumpIndicator,
                           double groundAccel,
-                          double slideAccel,
                           double q1Accel,
                           double q3Accel,
                           double q1MaxAccel,
@@ -56,7 +54,6 @@ public class ModStubConfig {
         JUMP_INDICATORS_MODE = jumpIndicator;
 
         ACCELERATE = groundAccel;
-        SLIDE_ACCELERATE = slideAccel;
         Q1_AIR_ACCELERATE = q1Accel;
         Q3_AIR_ACCELERATE = q3Accel;
         Q1_MAX_AIR_ACCEL_PER_TICK = q1MaxAccel;
@@ -86,7 +83,6 @@ public class ModStubConfig {
         buf.writeInt (JUMP_INDICATORS_MODE);
 
         buf.writeDouble (ACCELERATE);
-        buf.writeDouble (SLIDE_ACCELERATE);
         buf.writeDouble (Q1_AIR_ACCELERATE);
         buf.writeDouble (Q3_AIR_ACCELERATE);
         buf.writeDouble (Q1_MAX_AIR_ACCEL_PER_TICK);
@@ -116,7 +112,6 @@ public class ModStubConfig {
                 buf.readInt (),     // jump indicators enabled
 
                 buf.readDouble (),  // ground accel
-                buf.readDouble (),  // slide accel
                 buf.readDouble (),  // q1 air accel
                 buf.readDouble (),  // q3 air accel
                 buf.readDouble (),  // q1 max air accel

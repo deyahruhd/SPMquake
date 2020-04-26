@@ -21,9 +21,6 @@ public class ModConfig
 	private static final String ACCELERATE_NAME = "groundAccelerate";
 	private static final double ACCELERATE_DEFAULT = 100.0D;
 
-	private static final String SLIDE_ACCELERATE_NAME = "slideAccelerate";
-	private static final double SLIDE_ACCELERATE_DEFAULT = 6.0D;
-
 	private static final String Q1_AIR_ACCELERATE_NAME = "q1airAccelerate";
 	private static final double Q1_AIR_ACCELERATE_DEFAULT = 12.0D;
 
@@ -81,7 +78,6 @@ public class ModConfig
 				config.get(CATEGORY_MOVEMENT, ENABLED_NAME, ENABLED_DEFAULT, "whether the quake physics are enabled on the client").getBoolean(ENABLED_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, JUMP_INDICATORS_MODE_NAME, JUMP_INDICATORS_MODE_DEFAULT, "selects the crosshair and button indicators to render in the HUD:\n0 - vanilla minecraft\n1 - dot only\n2 - dot and movement key indicators").setMinValue (0).setMaxValue (2).getInt (JUMP_INDICATORS_MODE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, ACCELERATE_NAME, ACCELERATE_DEFAULT, "a higher value means you accelerate faster on the ground").getDouble(ACCELERATE_DEFAULT),
-				config.get(CATEGORY_MOVEMENT, SLIDE_ACCELERATE_NAME, SLIDE_ACCELERATE_DEFAULT, "higher slide values allow you to turn sharper while sliding").getDouble(SLIDE_ACCELERATE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, Q1_AIR_ACCELERATE_NAME, Q1_AIR_ACCELERATE_DEFAULT, "acceleration applied when holding only a strafe key").getDouble(Q1_AIR_ACCELERATE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, Q3_AIR_ACCELERATE_NAME, Q3_AIR_ACCELERATE_DEFAULT, "acceleration applied when holding forward + a strafe key").getDouble(Q3_AIR_ACCELERATE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, Q1_MAX_AIR_ACCEL_PER_TICK_NAME, Q1_MAX_AIR_ACCEL_PER_TICK_DEFAULT, "maximum speed attainable per tick when holding only a strafe key").getDouble(Q1_MAX_AIR_ACCEL_PER_TICK_DEFAULT),
@@ -106,7 +102,6 @@ public class ModConfig
 				enabled,
 				VALUES.JUMP_INDICATORS_MODE,
 				VALUES.ACCELERATE,
-				VALUES.SLIDE_ACCELERATE,
 				VALUES.Q1_AIR_ACCELERATE,
 				VALUES.Q3_AIR_ACCELERATE,
 				VALUES.Q1_MAX_AIR_ACCEL_PER_TICK,

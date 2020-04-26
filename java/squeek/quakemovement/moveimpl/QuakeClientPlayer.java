@@ -44,9 +44,6 @@ public class QuakeClientPlayer
 	// Wall clipping
 	private static long playerGroundTouchTime = 0;
 
-	// Sliding
-	private static float playerSlide 		  = -1.f;
-
 	static
 	{
 		try
@@ -566,17 +563,6 @@ public class QuakeClientPlayer
 			if (onGroundForReal)
 			{
 				float dynamicCap = -1.0f;
-				if (player.isSneaking () && getSpeed (player) > 0.21540) {
-					if (playerSlide < 0.f)
-						playerSlide = 0.999f;
-					wishspeed *= 3.50f;
-					sv_accelerate = ModConfig.VALUES.SLIDE_ACCELERATE;
-					momentumRetention = 0.99f;
-					dynamicCap = (float) getSpeed (player) * (1.f - (playerSlide - 1.f) * (playerSlide - 1.f));
-					playerSlide = Math.max (playerSlide - 0.01f, 0.f);
-				} else {
-					playerSlide = -1.f;
-				}
 				minecraft_ApplyFriction(player, momentumRetention);
 
 				if (wishspeed == 0.f && dynamicCap > 0.f) {
@@ -592,10 +578,7 @@ public class QuakeClientPlayer
 			}
 			// air movement
 			else
-			{
-				playerSlide = -1.f;
 				quake_AirAccelerate(player, wishspeed, 0.0f, wishdir[0], wishdir[1], sidemove != 0.f, forwardmove != 0.f);
-			}
 
 			if (getSpeed (player) > 0.21540 && (System.currentTimeMillis () - playerGroundTouchTime > ModConfig.VALUES.WALL_CLIP_TIME)
 					&& player.onGround && ! onGroundForReal)
