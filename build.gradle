@@ -14,7 +14,7 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle.forge'
 
 minecraft {
-    version = "1.12.2-14.23.0.2486"
+    version = "1.12.2-14.23.5.2814"
     mappings = "stable_39"
     runDir = "run"
 
