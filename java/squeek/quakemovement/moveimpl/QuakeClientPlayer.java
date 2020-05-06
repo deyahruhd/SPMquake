@@ -44,6 +44,9 @@ public class QuakeClientPlayer
 	// Wall clipping
 	private static long playerGroundTouchTime = 0;
 
+	// View bobbing jump duck
+	private static long playerGroundLandTime  = 0;
+	private static boolean wasOnGround = true;
 	static
 	{
 		try
@@ -341,11 +344,12 @@ public class QuakeClientPlayer
 
 	private static double scaledPlayerWalkDist = -1.f;
 	private static float speedScale = 0.f;
+	private static float jumpDuck = 0.f;
 	private static float linearSpeedScale = 0.f;
 	private static long startTime = System.nanoTime ();
 
 	private static double logScale (double x, double pow) {
-		return (Math.log (x + Math.pow ((1.0 / Math.E), pow)) + pow) / pow;
+		return (Math.log (x + Math.exp (-pow)) + pow) / pow;
 	}
 
 	public static boolean applyNormalBobbing(float partialTicks)
@@ -364,34 +368,52 @@ public class QuakeClientPlayer
 
 			float smoothTime = (float) (System.nanoTime () - startTime) / 1000000000.f;
 
-			speedScale = (float) (speedScale + (rawSpeedScale - speedScale) * 0.008);
-			linearSpeedScale = (float) (linearSpeedScale + (getSpeed (entityplayer) - linearSpeedScale) * 0.008);
+			speedScale = (float) (speedScale + (rawSpeedScale - speedScale) * 0.004);
+			linearSpeedScale = (float) (linearSpeedScale + (getSpeed (entityplayer) - linearSpeedScale) * 0.004);
 
 			if (scaledPlayerWalkDist < 0.0 || Double.isNaN (scaledPlayerWalkDist))
 				scaledPlayerWalkDist = entityplayer.prevDistanceWalkedModified;
 
 			float delta = (float) (entityplayer.distanceWalkedModified - entityplayer.prevDistanceWalkedModified);
-			float scaledDelta = (float) logScale (delta, 6.0);
+			float scaledDelta = (float) logScale (delta, 8.0) * 0.9f;
+
+			if (entityplayer.onGround && ! wasOnGround)
+				scaledDelta = 0.0f;
+
 			float f1 = -(float) (scaledPlayerWalkDist + scaledDelta * partialTicks) * 0.006f * 0.8f;
+			float f2 = entityplayer.prevCameraYaw + (entityplayer.cameraYaw - entityplayer.prevCameraYaw) * partialTicks;
+			float f3 = entityplayer.prevCameraPitch + (entityplayer.cameraPitch - entityplayer.prevCameraPitch) * partialTicks;
 			scaledPlayerWalkDist += scaledDelta;
 
 			float speedSwayX = (float) Math.cos (smoothTime * 0.31 * Math.PI) * linearSpeedScale * 8.4f;
 			float speedSwayY = (float) Math.sin (smoothTime * 0.42 * Math.PI) * linearSpeedScale * 5.4f;
+			float walkSwayX  = MathHelper.sin (f1 * (float) Math.PI) * -5.f;
+			float walkSwayY  = Math.abs (MathHelper.cos (f1 * (float) Math.PI)) * 3.f;
+
+			float landDelta   = (float) (System.nanoTime() - playerGroundLandTime) / 125000000.f;
+			float rawJumpDuck = (float) - Math.pow (2.0, - Math.pow (landDelta, 1.5)) * landDelta * 0.35f;
+
+			jumpDuck = (float) (jumpDuck + (rawJumpDuck - jumpDuck) * 0.03);
+
+			speedScale = speedScale + (-speedScale * MathHelper.clamp (1.f - landDelta, 0.f, 1.f));
 
 			if (! doSpeedSway) {
 				speedSwayX = 0.0F;
 				speedSwayY = 0.0F;
+				walkSwayX = 0.0F;
+				walkSwayY = 0.0F;
 			}
 
-			float f2 = entityplayer.prevCameraYaw + (entityplayer.cameraYaw - entityplayer.prevCameraYaw) * partialTicks;
-			float f3 = entityplayer.prevCameraPitch + (entityplayer.cameraPitch - entityplayer.prevCameraPitch) * partialTicks;
-			GlStateManager.translate(speedScale * MathHelper.sin(f1 * (float)Math.PI) * f2 * 1.F,
-									 Math.abs(speedScale * MathHelper.cos(f1 * (float)Math.PI) * f2) - (speedScale * 0.075),
-					              0.0F);
-			GlStateManager.rotate((speedScale * MathHelper.sin(f1 * (float)Math.PI * 0.8f) * f2 * 3.0F), 0.0F, 0.0F, 1.0F);
-			GlStateManager.rotate((Math.abs(speedScale * MathHelper.cos(f1 * (float)Math.PI - 0.2F) * f2) * 5.0F), 1.0F, 0.0F, 0.0F);
-			GlStateManager.rotate(speedSwayX, 0.0F, 1.0F, 0.0F);
-			GlStateManager.rotate(f3 + speedSwayY, 1.0F, 0.0F, 0.0F);
+			float in = doSpeedSway ? - jumpDuck : jumpDuck;
+			float playerPitch = entityplayer.rotationPitch;
+			Vec3d jumpDuckCorrected = new Vec3d (0.0F, - in * Math.cos (playerPitch * Math.PI / 180.0),
+						                                    - in * Math.sin (playerPitch * Math.PI / 180.0));
+
+			GlStateManager.translate(0.0F, jumpDuckCorrected.y, jumpDuckCorrected.z);
+			GlStateManager.rotate((Math.min (landDelta, 1.f) * speedScale * MathHelper.sin(f1 * (float)Math.PI * 0.8f) * f2 * 3.0F), 0.0F, 0.0F, 1.0F);
+			GlStateManager.rotate((Math.min (landDelta, 1.f) * Math.abs(speedScale * MathHelper.cos(f1 * (float)Math.PI - 0.2F) * f2) * 5.0F), 1.0F, 0.0F, 0.0F);
+			GlStateManager.rotate(speedSwayX + Math.min (landDelta, 1.f) * speedScale * walkSwayX, 0.0F, 1.0F, 0.0F);
+			GlStateManager.rotate(f3 + speedSwayY + Math.min (landDelta, 1.f) * speedScale * walkSwayY, 1.0F, 0.0F, 0.0F);
 		}
 		return false;
 	}
@@ -579,8 +601,14 @@ public class QuakeClientPlayer
 				quake_AirAccelerate(player, wishspeed, 0.0f, wishdir[0], wishdir[1], sidemove != 0.f, forwardmove != 0.f);
 
 			if (getSpeed (player) > 0.21540 && (System.currentTimeMillis () - playerGroundTouchTime > ModConfig.VALUES.WALL_CLIP_TIME)
-					&& player.onGround && ! onGroundForReal)
-				playerGroundTouchTime = System.currentTimeMillis ();
+					&& player.onGround && ! onGroundForReal) {
+				playerGroundTouchTime = System.currentTimeMillis();
+			}
+
+			if (player.onGround && ! wasOnGround)
+				playerGroundLandTime = System.nanoTime ();
+
+			wasOnGround = player.onGround;
 
 			Vec3d previousVel = new Vec3d (player.motionX, player.motionY, player.motionZ);
 
