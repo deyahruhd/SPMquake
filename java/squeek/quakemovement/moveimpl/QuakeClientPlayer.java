@@ -284,12 +284,13 @@ public class QuakeClientPlayer
 
 	public static void applyExplosionToSPPlayer (Explosion e, SPacketExplosion packet) {
 		float str = packet.getStrength ();
+		float dist = packet.getStrength () + 2.5f;
 		EntityPlayerSP player = Minecraft.getMinecraft().player;
 		Vec3d ePos = e.getPosition ();
 		Vec3d pPos = new Vec3d (player.posX, player.posY, player.posZ).add (0.0, player.getEyeHeight () / 2.0, 0.0);
 		float sqDist = (float) ePos.subtract(pPos).lengthSquared ();
-		if (sqDist <= (str * str)) {
-			float normalizedDist = MathHelper.sqrt (sqDist) / str;
+		if (sqDist <= (dist * dist)) {
+			float normalizedDist = MathHelper.sqrt (sqDist) / dist;
 			Vec3d diff = ePos.subtract (pPos).normalize();
 
 			normalizedDist = 1.f - (normalizedDist * normalizedDist * normalizedDist); // Curved accordingly
@@ -444,7 +445,10 @@ public class QuakeClientPlayer
 		else
 		{
 			// gravity
-			player.motionY -= 0.08D;
+			double scaledGravity = (0.08D *
+					MathHelper.clamp ((float) (System.currentTimeMillis () - playerAirbornTime) /
+										    (float) ModConfig.VALUES.KNOCKBACK_SLICK_TIME, 0.1F, 1.0F));
+			player.motionY -= scaledGravity;
 		}
 
 		// air resistance
