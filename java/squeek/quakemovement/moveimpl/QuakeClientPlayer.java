@@ -191,7 +191,7 @@ public class QuakeClientPlayer
 		// near you, right before you land on the ground, grants you a 50-200ms period of 0 friction. This can
 		// allow doubling or even tripling your speed with a well timed and quick circle jump.
 		// For now it's activated when receiving knockback from an explosion
-		if (player.onGround && (time - playerAirbornTime > ModConfig.VALUES.KNOCKBACK_SLICK_TIME))
+		if (player.onGround && (time - playerAirbornTime > ModConfig.VALUES.KNOCKBACK_SLICK_TIME * explosionStr))
 		{
 			BlockPos groundPos = new BlockPos(MathHelper.floor(player.posX), MathHelper.floor(player.getEntityBoundingBox().minY) - 1, MathHelper.floor(player.posZ));
 			Block ground = player.world.getBlockState(groundPos).getBlock();
