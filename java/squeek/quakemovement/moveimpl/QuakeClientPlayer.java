@@ -40,6 +40,7 @@ public class QuakeClientPlayer
 
 	// PGB
 	private static long playerAirbornTime     = 0;
+	private static float explosionStr         = 0.f;
 
 	// Wall clipping
 	private static long playerGroundTouchTime = 0;
@@ -290,12 +291,12 @@ public class QuakeClientPlayer
 		Vec3d pPos = new Vec3d (player.posX, player.posY, player.posZ).add (0.0, player.getEyeHeight () / 2.0, 0.0);
 		float sqDist = (float) ePos.subtract(pPos).lengthSquared ();
 		if (sqDist <= (dist * dist)) {
-			float normalizedDist = MathHelper.sqrt (sqDist) / dist;
+			explosionStr = MathHelper.sqrt (sqDist) / dist;
+
+			explosionStr = 1.f - (explosionStr * explosionStr * explosionStr); // Curved accordingly
+			float normalizedDist = explosionStr * -0.333f;
+
 			Vec3d diff = ePos.subtract (pPos).normalize();
-
-			normalizedDist = 1.f - (normalizedDist * normalizedDist * normalizedDist); // Curved accordingly
-			normalizedDist *= -0.333f;
-
 			diff = diff.scale (str * normalizedDist);
 
 			player.addVelocity (diff.x * 0.66f, diff.y, diff.z * 0.66f);
@@ -447,7 +448,7 @@ public class QuakeClientPlayer
 			// gravity
 			double scaledGravity = (0.08D *
 					MathHelper.clamp ((float) (System.currentTimeMillis () - playerAirbornTime) /
-										    (float) ModConfig.VALUES.KNOCKBACK_SLICK_TIME, 0.1F, 1.0F));
+							((float) ModConfig.VALUES.KNOCKBACK_SLICK_TIME * explosionStr), 0.1F, 1.0F));
 			player.motionY -= scaledGravity;
 		}
 
