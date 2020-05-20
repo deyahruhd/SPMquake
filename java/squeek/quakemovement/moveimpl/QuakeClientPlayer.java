@@ -366,38 +366,32 @@ public class QuakeClientPlayer
 		if (renderEntity instanceof EntityPlayer && ModQuakeMovement.shouldDoQuakeMovement ((EntityPlayer) renderEntity)) {
 			EntityPlayer entityplayer = (EntityPlayer) renderEntity;
 			double playerSpeed = getSpeed (entityplayer);
-			float rawSpeedScale = (entityplayer.onGround && ! entityplayer.isSneaking ()) ? (float) (logScale (playerSpeed, 2.0) * 2.0) : 0.f;
+			float rawSpeedScale = (entityplayer.onGround && ! isJumping (entityplayer) && ! entityplayer.isSneaking ()) ? (float) (logScale (playerSpeed, 2.0) * 2.0) : 0.f;
 
 			float smoothTime = (float) (System.nanoTime () - startTime) / 1000000000.f;
 
-			speedScale = (float) (speedScale + (rawSpeedScale - speedScale) * 0.004);
-			linearSpeedScale = (float) (linearSpeedScale + (getSpeed (entityplayer) - linearSpeedScale) * 0.004);
 
 			if (scaledPlayerWalkDist < 0.0 || Double.isNaN (scaledPlayerWalkDist))
 				scaledPlayerWalkDist = entityplayer.prevDistanceWalkedModified;
 
 			float delta = (float) (entityplayer.distanceWalkedModified - entityplayer.prevDistanceWalkedModified);
+			float landDelta   = (float) (System.nanoTime() - playerGroundLandTime) / 125000000.f;
+
+			speedScale = (float) (speedScale + (rawSpeedScale - speedScale) * 0.042);
+			linearSpeedScale = (float) (linearSpeedScale + (getSpeed (entityplayer) - linearSpeedScale) * 0.004);
 			float scaledDelta = (float) logScale (delta, 8.0) * 0.9f;
-
-			if (entityplayer.onGround && ! wasOnGround)
-				scaledDelta = 0.0f;
-
-			float f1 = -(float) (scaledPlayerWalkDist + scaledDelta * partialTicks) * 0.006f * 0.8f;
-			float f2 = entityplayer.prevCameraYaw + (entityplayer.cameraYaw - entityplayer.prevCameraYaw) * partialTicks;
-			float f3 = entityplayer.prevCameraPitch + (entityplayer.cameraPitch - entityplayer.prevCameraPitch) * partialTicks;
 			scaledPlayerWalkDist += scaledDelta;
 
+			float f1 = -(float) (scaledPlayerWalkDist) * 0.006f * 0.8f;
+			float f2 = entityplayer.prevCameraYaw + (entityplayer.cameraYaw - entityplayer.prevCameraYaw) * partialTicks;
+			float f3 = entityplayer.prevCameraPitch + (entityplayer.cameraPitch - entityplayer.prevCameraPitch) * partialTicks;
 			float speedSwayX = (float) Math.cos (smoothTime * 0.31 * Math.PI) * linearSpeedScale * 8.4f;
 			float speedSwayY = (float) Math.sin (smoothTime * 0.42 * Math.PI) * linearSpeedScale * 5.4f;
-			float walkSwayX  = MathHelper.sin (f1 * (float) Math.PI) * -5.f;
-			float walkSwayY  = Math.abs (MathHelper.cos (f1 * (float) Math.PI)) * 3.f;
-
-			float landDelta   = (float) (System.nanoTime() - playerGroundLandTime) / 125000000.f;
+			float walkSwayX  = MathHelper.sin (f1 * (float) Math.PI) * -3.5f;
+			float walkSwayY  = Math.abs (MathHelper.cos (f1 * (float) Math.PI)) * 1.6666f;
 			float rawJumpDuck = (float) - Math.pow (2.0, - Math.pow (landDelta, 1.5)) * landDelta * 0.35f;
+			jumpDuck = (float) (jumpDuck + (rawJumpDuck - jumpDuck) * 0.042);
 
-			jumpDuck = (float) (jumpDuck + (rawJumpDuck - jumpDuck) * 0.03);
-
-			speedScale = speedScale + (-speedScale * MathHelper.clamp (1.f - landDelta, 0.f, 1.f));
 
 			if (! doSpeedSway) {
 				speedSwayX = 0.0F;
@@ -412,10 +406,10 @@ public class QuakeClientPlayer
 						                                    - in * Math.sin (playerPitch * Math.PI / 180.0));
 
 			GlStateManager.translate(0.0F, jumpDuckCorrected.y, jumpDuckCorrected.z);
-			GlStateManager.rotate((Math.min (landDelta, 1.f) * speedScale * MathHelper.sin(f1 * (float)Math.PI * 0.8f) * f2 * 3.0F), 0.0F, 0.0F, 1.0F);
-			GlStateManager.rotate((Math.min (landDelta, 1.f) * Math.abs(speedScale * MathHelper.cos(f1 * (float)Math.PI - 0.2F) * f2) * 5.0F), 1.0F, 0.0F, 0.0F);
-			GlStateManager.rotate(speedSwayX + Math.min (landDelta, 1.f) * speedScale * walkSwayX, 0.0F, 1.0F, 0.0F);
-			GlStateManager.rotate(f3 + speedSwayY + Math.min (landDelta, 1.f) * speedScale * walkSwayY, 1.0F, 0.0F, 0.0F);
+			GlStateManager.rotate((/*Math.min (landDelta, 1.f) */ speedScale * MathHelper.sin(f1 * (float)Math.PI * 0.8f) * f2 * 3.0F), 0.0F, 0.0F, 1.0F);
+			GlStateManager.rotate((/*Math.min (landDelta, 1.f) */ Math.abs(speedScale * MathHelper.cos(f1 * (float)Math.PI - 0.2F) * f2) * 5.0F), 1.0F, 0.0F, 0.0F);
+			GlStateManager.rotate(speedSwayX + /*Math.min (landDelta, 1.f) */ speedScale * walkSwayX, 0.0F, 1.0F, 0.0F);
+			GlStateManager.rotate(f3 + speedSwayY + /*Math.min (landDelta, 1.f) */ speedScale * walkSwayY, 1.0F, 0.0F, 0.0F);
 		}
 		return false;
 	}
