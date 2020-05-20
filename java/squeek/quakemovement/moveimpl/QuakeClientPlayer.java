@@ -196,11 +196,8 @@ public class QuakeClientPlayer
 			BlockPos groundPos = new BlockPos(MathHelper.floor(player.posX), MathHelper.floor(player.getEntityBoundingBox().minY) - 1, MathHelper.floor(player.posZ));
 			Block ground = player.world.getBlockState(groundPos).getBlock();
 
-			if (ground.slipperiness < 1.0) {
-				float curvedSlip = MathHelper.clamp(1.f + (float) Math.pow(ground.slipperiness - 1, 5), 0.f, 1.f);
-
+			if (ground.slipperiness < 1.0)
 				f2 = ground.slipperiness * 0.91F;
-			}
 		}
 		return f2;
 	}
