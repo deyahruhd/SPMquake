@@ -18,11 +18,12 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 	private static String CLASS_ENTITY 			   		= "net.minecraft.entity.Entity";
 	private static String CLASS_ENTITY_RENDERER         = "net.minecraft.client.renderer.EntityRenderer";
 	private static String CLASS_NET_HANDLER_PLAY_CLIENT = "net.minecraft.client.network.NetHandlerPlayClient";
-	private static String CLASS_SPACKET_EXPLOSION 		= "net.minecraft.network.play.server.SPacketExplosion";
 
 	private static String CLASS_QUAKE_CLIENT_PLAYER 	= "squeek.quakemovement.movement.QuakeClientPlayer";
 	private static String CLASS_QUAKE_SERVER_PLAYER 	= "squeek.quakemovement.movement.QuakeServerPlayer";
 
+	private static String CLASS_GROUNDBOOSTMUTATOR      = "squeek.quakemovement.movement.mutators.impl.GroundBoostMutator";
+	private static String CLASS_VIEWBOBMUTATOR          = "squeek.quakemovement.movement.mutators.impl.ViewBobMutator";
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes)
 	{
@@ -106,7 +107,7 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 
 			AbstractInsnNode setVel = findLastInstructionWithOpcode (method, Opcodes.INVOKEVIRTUAL);
 
-			method.instructions.insertBefore(setVel, new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_QUAKE_CLIENT_PLAYER), "setEntityVelocity", "(L" + entityName + ";DDD)V", false));
+			method.instructions.insertBefore(setVel, new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_GROUNDBOOSTMUTATOR), "setEntityVelocity", "(L" + entityName + ";DDD)V", false));
 			method.instructions.remove (setVel);
 
 			MethodNode method2;
@@ -122,7 +123,7 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 			InsnList loadParameters = new InsnList();
 			loadParameters.add(new VarInsnNode(Opcodes.ALOAD, 2));
 			loadParameters.add(new VarInsnNode(Opcodes.ALOAD, 1));
-			loadParameters.add(new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_QUAKE_CLIENT_PLAYER), "applyExplosionToSPPlayer", "(L" + explosionName + ";L" + packetExpName + ";)V", false));
+			loadParameters.add(new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName (CLASS_GROUNDBOOSTMUTATOR), "applyExplosionToSPPlayer", "(L" + explosionName + ";L" + packetExpName + ";)V", false));
 			loadParameters.add(new InsnNode(Opcodes.RETURN));
 
 			method2.instructions.insertBefore (doExplosionB, loadParameters);
@@ -140,7 +141,7 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 
 			InsnList loadParameters = new InsnList ();
 			loadParameters.add (new VarInsnNode (Opcodes.FLOAD, 1));
-			injectStandardHook (applyBobbing, applyBobbing.instructions.getFirst (), CLASS_QUAKE_CLIENT_PLAYER, "applyNormalBobbing", "(F)Z", loadParameters);
+			injectStandardHook (applyBobbing, applyBobbing.instructions.getFirst (), CLASS_VIEWBOBMUTATOR, "applyNormalBobbing", "(F)Z", loadParameters);
 
 
 
@@ -159,7 +160,7 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 			if (firstBobbingCall == null)
 				throw new RuntimeException("bobbing call was not found in setupCameraTransform");
 
-			injectStandardHook (setupCameraTransform, firstBobbingCall.getNext (), CLASS_QUAKE_CLIENT_PLAYER, "applyCustomBobbing", "(FZ)Z",
+			injectStandardHook (setupCameraTransform, firstBobbingCall.getNext (), CLASS_VIEWBOBMUTATOR, "applyCustomBobbing", "(FZ)Z",
 					loadParameters1);
 
 
@@ -179,7 +180,7 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 			if (secondBobbingCall == null)
 				throw new RuntimeException("1st bobbing call was not found in renderHand");
 
-			injectStandardHook (renderHand, secondBobbingCall.getNext (), CLASS_QUAKE_CLIENT_PLAYER, "applyCustomBobbing", "(FZ)Z",
+			injectStandardHook (renderHand, secondBobbingCall.getNext (), CLASS_VIEWBOBMUTATOR, "applyCustomBobbing", "(FZ)Z",
 					loadParameters2);
 
 			AbstractInsnNode lastBobbingCall = getOrFindMethodInsn (renderHand.instructions.getLast (), isObfuscated ? "f" : "applyBobbing", "(F)V", true);
@@ -191,7 +192,7 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 			loadParameters3.add (new VarInsnNode (Opcodes.FLOAD, 1));
 			loadParameters3.add (new InsnNode (Opcodes.ICONST_1));
 
-			injectStandardHook (renderHand, lastBobbingCall.getNext (), CLASS_QUAKE_CLIENT_PLAYER, "applyCustomBobbing", "(FZ)Z",
+			injectStandardHook (renderHand, lastBobbingCall.getNext (), CLASS_VIEWBOBMUTATOR, "applyCustomBobbing", "(FZ)Z",
 					loadParameters3);
 
 			return writeClassToBytes (classNode);

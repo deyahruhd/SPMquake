@@ -2,8 +2,10 @@ package squeek.quakemovement.movement.mutators;
 
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.Vec3d;
+import squeek.quakemovement.movement.mutators.impl.ViewBobMutator;
 
 import javax.annotation.Nullable;
+import java.util.Comparator;
 import java.util.Set;
 
 /**
@@ -29,33 +31,42 @@ public abstract class Mutator {
      * The Mutator can then test MovementInput and activate their effects accordingly.
      */
     public enum MovementInput {
-        FORWARD,
-        FOR_RIGHT,
-        RIGHT,
-        BACK_RIGHT,
-        BACK,
-        BACK_LEFT,
-        LEFT,
-        FOR_LEFT,
-        JUMP,
-        SNEAK,
-        ITEM_USE,
-        ITEM_SWING
+        FORWARD    (false,  true),
+        FOR_RIGHT  (true,   true),
+        RIGHT      (true,   false),
+        BACK_RIGHT (true,   true),
+        BACK       (false,  true),
+        BACK_LEFT  (true,   true),
+        LEFT       (true,   false),
+        FOR_LEFT   (true,   true),
+        JUMP       (false,  false),
+        SNEAK      (false,  false),
+        ITEM_USE   (false,  false),
+        ITEM_SWING (false,  false);
+
+        boolean strafe, forward;
+
+        MovementInput (boolean isStrafe, boolean isForward) {
+            strafe = isStrafe;
+            forward = isForward;
+        }
     }
 
     /**
-     * Movement method called before the invocation of player.move ().
+     * Movement methods called when accelerating the player while they are on the ground or in the air, respectively.
      *
-     * @param player  The client player.
-     * @param wishdir The player's wish dir.
-     * @param input   If applicable, the MovementInput which triggered this Mutator
+     * @param  player    The client player.
+     * @param  wishdir   The player's wish dir.
+     * @param  wishspeed The player's wish speed.
+     * @param  input     If applicable, the MovementInput which triggered this Mutator
      * @return true, if this is a MovementOverride Mutator and the MovementInput should not be propagated further down
      *         the list of active Mutators, or false otherwise.
      */
-    public abstract boolean preMove  (EntityPlayerSP player, Vec3d wishdir, MovementInput input);
+    public abstract boolean groundMove (EntityPlayerSP player, Vec3d wishdir, float wishspeed, @Nullable MovementInput input);
+    public abstract boolean airMove    (EntityPlayerSP player, Vec3d wishdir, float wishspeed, @Nullable MovementInput input);
 
     /**
-     * Movement method called after the invocation of player.move ().
+     * Movement methods called before the invocation of any acceleration methods. (e.g. groundMove, airMove)
      *
      * @param player  The client player.
      * @param wishdir The player's wish dir.
@@ -63,7 +74,8 @@ public abstract class Mutator {
      * @return true, if this is a MovementOverride Mutator and the MovementInput should not be propagated further down
      *         the list of active Mutators, or false otherwise.
      */
-    public abstract boolean postMove (EntityPlayerSP player, Vec3d wishdir, MovementInput input);
+    public abstract boolean preMove (EntityPlayerSP player, Vec3d wishdir, @Nullable MovementInput input);
+    public abstract boolean postMove (EntityPlayerSP player, Vec3d wishdir, @Nullable MovementInput input);
 
     /**
      * The set of all movement inputs this Mutator listens to.
@@ -73,7 +85,7 @@ public abstract class Mutator {
      *
      * For Mutators which return MovementBase from getType(), listenTo is not called, and thus can be null.
      *
-     * For Mutatotrs which return MovementPassive from getType(), listenTo must return a null set.
+     * For Mutators which return MovementPassive from getType(), listenTo must return a null set.
      */
     @Nullable
     public abstract Set <MovementInput> listenTo ();
@@ -82,4 +94,23 @@ public abstract class Mutator {
      * @return The movement type of the Mutator.
      */
     public abstract MutatorType getType ();
+
+    public static class MutatorComparator implements Comparator<Mutator> {
+        @Override
+        public int compare(Mutator o1, Mutator o2) {
+            // View bobbing is always last in the list
+            if (o1 instanceof ViewBobMutator && o2 instanceof ViewBobMutator)
+                return 0;
+            if (o2 instanceof ViewBobMutator)
+                return -1;
+            if (o1 instanceof ViewBobMutator)
+                return 1;
+
+            if (o1.getType () != o2.getType())
+                return o1.getType ().compareTo (o2.getType ());
+            else
+                // Fallback: Since ordering of mutators of the same type doesn't really matter at this point
+                return Integer.compareUnsigned (o1.hashCode(), o2.hashCode ());
+        }
+    }
 }
