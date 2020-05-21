@@ -1,4 +1,4 @@
-package squeek.quakemovement.moveimpl;
+package squeek.quakemovement.movement;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

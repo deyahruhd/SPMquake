@@ -1,7 +1,6 @@
 package squeek.quakemovement.handler;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -12,7 +11,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import squeek.quakemovement.ModQuakeMovement;
 import squeek.quakemovement.config.ModConfig;
-import squeek.quakemovement.moveimpl.QuakeClientPlayer;
+import squeek.quakemovement.movement.QuakeClientPlayer;
 
 public class HungerJumpPacket implements IMessage, IMessageHandler<HungerJumpPacket, IMessage> {
     double speed = 0.0;

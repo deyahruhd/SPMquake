@@ -20,8 +20,8 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 	private static String CLASS_NET_HANDLER_PLAY_CLIENT = "net.minecraft.client.network.NetHandlerPlayClient";
 	private static String CLASS_SPACKET_EXPLOSION 		= "net.minecraft.network.play.server.SPacketExplosion";
 
-	private static String CLASS_QUAKE_CLIENT_PLAYER 	= "squeek.quakemovement.moveimpl.QuakeClientPlayer";
-	private static String CLASS_QUAKE_SERVER_PLAYER 	= "squeek.quakemovement.moveimpl.QuakeServerPlayer";
+	private static String CLASS_QUAKE_CLIENT_PLAYER 	= "squeek.quakemovement.movement.QuakeClientPlayer";
+	private static String CLASS_QUAKE_SERVER_PLAYER 	= "squeek.quakemovement.movement.QuakeServerPlayer";
 
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes)
