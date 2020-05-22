@@ -1,5 +1,6 @@
 package squeek.quakemovement.movement.mutators;
 
+import com.google.common.collect.Sets;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.Vec3d;
 import squeek.quakemovement.movement.mutators.impl.ViewBobMutator;
@@ -113,4 +114,9 @@ public abstract class Mutator {
                 return Integer.compareUnsigned (o1.hashCode(), o2.hashCode ());
         }
     }
+
+    public static Set<MovementInput> BASE_INPUT_SET = Sets.immutableEnumSet (MovementInput.FORWARD, MovementInput.FOR_LEFT,
+                                                                             MovementInput.LEFT, MovementInput.BACK_LEFT,
+                                                                             MovementInput.BACK, MovementInput.BACK_RIGHT,
+                                                                             MovementInput.RIGHT, MovementInput.FOR_RIGHT);
 }

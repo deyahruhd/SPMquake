@@ -52,6 +52,26 @@ public class QuakeClientPlayer {
 		}
 	}
 
+	private static void doAccel (EntityPlayer player, Vec3d wishdir, float wishspeed, Mutator.MovementInput input) {
+		boolean propagateInput = input != null;
+		boolean onGroundForReal = player.onGround && !isJumping(player);
+		for (Mutator m : mutators) {
+			if ((((m.getType () == Mutator.MutatorType.MovementOverride && m.listenTo () != null && input != null && m.listenTo().contains (input))
+					|| m.getType () == Mutator.MutatorType.MovementBase && Mutator.BASE_INPUT_SET.contains (input)) && propagateInput) ||
+					m.getType() == Mutator.MutatorType.MovementPassive) {
+				boolean res = onGroundForReal ? m.groundMove ((EntityPlayerSP) player, wishdir, wishspeed, input) :
+						m.airMove ((EntityPlayerSP) player, wishdir, wishspeed, input);
+
+				onGroundForReal = player.onGround && !isJumping(player);
+
+				if (propagateInput)
+					propagateInput = !res;
+				else if (m.getType () == Mutator.MutatorType.MovementPassive)
+					propagateInput = false;
+			}
+		}
+	}
+
 	/**
 	 * Moves the entity based on the specified heading.  Args: strafe, forward
 	 */
@@ -60,7 +80,6 @@ public class QuakeClientPlayer {
 		Vec3d wishdir = getMovementDirection(player, sidemove, forwardmove).normalize();
 
 		Mutator.MovementInput input = null;
-		boolean propagateInput = false;
 		if (sidemove != 0.f || forwardmove != 0.f) {
 			if (forwardmove > 0.f) {
 				if (sidemove > 0.f)
@@ -82,9 +101,6 @@ public class QuakeClientPlayer {
 				else if (sidemove < 0.f)
 					input = Mutator.MovementInput.RIGHT;
 			}
-
-			if (input != null)
-				propagateInput = true;
 		}
 
 
@@ -111,24 +127,18 @@ public class QuakeClientPlayer {
 			// get all relevant movement values
 			float wishspeed = (sidemove != 0.0F || forwardmove != 0.0F) ? quake_getMoveSpeed(player) : 0.0F;
 
-			boolean onGroundForReal = player.onGround && !isJumping(player);
-
 			for (Mutator m : mutators) {
 				m.preMove ((EntityPlayerSP) player, wishdir, input);
 			}
 
-			for (Mutator m : mutators) {
-				if ((((m.getType () == Mutator.MutatorType.MovementOverride && m.listenTo () != null && input != null && m.listenTo().contains (input))
-						|| m.getType () == Mutator.MutatorType.MovementBase) && propagateInput) ||
-				    m.getType() == Mutator.MutatorType.MovementPassive) {
-					boolean res = onGroundForReal ? m.groundMove ((EntityPlayerSP) player, wishdir, wishspeed, input) :
-													m.airMove ((EntityPlayerSP) player, wishdir, wishspeed, input);
-					if (propagateInput)
-						propagateInput = !res;
-					else if (m.getType () == Mutator.MutatorType.MovementPassive)
-						propagateInput = false;
-				}
-			}
+			doAccel (player, wishdir, wishspeed, input);
+
+			if (player.isSneaking ())
+				doAccel (player, wishdir, wishspeed, Mutator.MovementInput.SNEAK);
+
+			if (QuakeClientPlayer.isJumping (player) && player.onGround)
+				doAccel (player, wishdir, wishspeed, Mutator.MovementInput.JUMP);
+
 			// apply velocity
 			player.move(MoverType.SELF, player.motionX, player.motionY, player.motionZ);
 			for (Mutator m : mutators) {
@@ -261,7 +271,7 @@ public class QuakeClientPlayer {
 		return f2;
 	}
 
-	private static Vec3d getMovementDirection(EntityPlayer player, float sidemove, float forwardmove) {
+	public static Vec3d getMovementDirection(EntityPlayer player, float sidemove, float forwardmove) {
 		float f3 = sidemove * sidemove + forwardmove * forwardmove;
 		float[] dir = {0.0F, 0.0F};
 
