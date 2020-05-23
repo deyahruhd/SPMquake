@@ -32,7 +32,7 @@ public class ModStubConfig {
 
     public final double INCREASED_FALL_DISTANCE;
 
-    public final String ARMOR_REQ;
+    public final String MOVEMENT_SET;
 
     public ModStubConfig (boolean enable,
                           int jumpIndicator,
@@ -49,7 +49,7 @@ public class ModStubConfig {
                           int clipTime,
                           double fallInc,
                           double rampJumpScale,
-                          String qualifiedArmorName) {
+                          String movementSetJson) {
         ENABLED = enable;
         JUMP_INDICATORS_MODE = jumpIndicator;
 
@@ -72,12 +72,12 @@ public class ModStubConfig {
 
         INCREASED_FALL_DISTANCE = fallInc;
 
-        ARMOR_REQ = qualifiedArmorName;
+        MOVEMENT_SET = movementSetJson;
     }
 
     public void to (ByteBuf buf) {
-        buf.writeInt (ARMOR_REQ.length ());
-        buf.writeBytes (ARMOR_REQ.getBytes ());
+        buf.writeInt (MOVEMENT_SET.length ());
+        buf.writeBytes (MOVEMENT_SET.getBytes ());
 
         buf.writeBoolean (ENABLED);
         buf.writeInt (JUMP_INDICATORS_MODE);
@@ -104,8 +104,8 @@ public class ModStubConfig {
 
     public static ModStubConfig from (ByteBuf buf) {
         int count = buf.readInt ();
-        byte [] armorBytes = new byte [count];
-        buf.readBytes (armorBytes);
+        byte [] movementSet = new byte [count];
+        buf.readBytes (movementSet);
 
         return new ModStubConfig (
                 buf.readBoolean (), // enabled
@@ -130,7 +130,7 @@ public class ModStubConfig {
 
                 buf.readDouble (),   // fall dist increase
 
-                new String (armorBytes)
+                new String (movementSet)
         );
     }
 }

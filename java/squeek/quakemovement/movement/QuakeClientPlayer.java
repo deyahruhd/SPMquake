@@ -32,15 +32,9 @@ public class QuakeClientPlayer {
 	private static Method setDidJumpThisTick = null;
 	private static Method setIsJumping = null;
 
-	private static TreeSet<Mutator> mutators = new TreeSet<> (new Mutator.MutatorComparator());
+	public static MovementSet movementPhysics = new MovementSet ();
 
 	static {
-		mutators.add(new QAnisotropicMovementBase());
-		mutators.add(new CPMAirSteerMutator());
-		mutators.add(new RampJumpMutator());
-		mutators.add(new WallClipMutator());
-		mutators.add(new GroundBoostMutator());
-		mutators.add(new ViewBobMutator());
 		try {
 			if (Loader.isModLoaded("squeedometer")) {
 				Class<?> hudSpeedometer = Class.forName("squeek.speedometer.HudSpeedometer");
@@ -55,7 +49,7 @@ public class QuakeClientPlayer {
 	private static void doAccel (EntityPlayer player, Vec3d wishdir, float wishspeed, Mutator.MovementInput input) {
 		boolean propagateInput = input != null;
 		boolean onGroundForReal = player.onGround && !isJumping(player);
-		for (Mutator m : mutators) {
+		for (Mutator m : movementPhysics.mutators) {
 			if ((((m.getType () == Mutator.MutatorType.MovementOverride && m.listenTo () != null && input != null && m.listenTo().contains (input))
 					|| m.getType () == Mutator.MutatorType.MovementBase && Mutator.BASE_INPUT_SET.contains (input)) && propagateInput) ||
 					m.getType() == Mutator.MutatorType.MovementPassive) {
@@ -76,7 +70,7 @@ public class QuakeClientPlayer {
 	 * Moves the entity based on the specified heading.  Args: strafe, forward
 	 */
 	public static boolean quake_moveEntityWithHeading(EntityPlayer player, float sidemove, float upmove, float forwardmove) {
-		ViewBobMutator viewBobbing = (ViewBobMutator) mutators.last();
+		ViewBobMutator viewBobbing = (ViewBobMutator) movementPhysics.mutators.last();
 		Vec3d wishdir = getMovementDirection(player, sidemove, forwardmove).normalize();
 
 		Mutator.MovementInput input = null;
@@ -127,7 +121,7 @@ public class QuakeClientPlayer {
 			// get all relevant movement values
 			float wishspeed = (sidemove != 0.0F || forwardmove != 0.0F) ? quake_getMoveSpeed(player) : 0.0F;
 
-			for (Mutator m : mutators) {
+			for (Mutator m : movementPhysics.mutators) {
 				m.preMove ((EntityPlayerSP) player, wishdir, input);
 			}
 
@@ -141,7 +135,7 @@ public class QuakeClientPlayer {
 
 			// apply velocity
 			player.move(MoverType.SELF, player.motionX, player.motionY, player.motionZ);
-			for (Mutator m : mutators) {
+			for (Mutator m : movementPhysics.mutators) {
 				m.postMove ((EntityPlayerSP) player, wishdir, input);
 			}
 		}

@@ -3,6 +3,7 @@ package squeek.quakemovement.movement.mutators;
 import com.google.common.collect.Sets;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 import squeek.quakemovement.movement.mutators.impl.ViewBobMutator;
 
 import javax.annotation.Nullable;
@@ -15,7 +16,7 @@ import java.util.Set;
 
 
  */
-public abstract class Mutator {
+public abstract class Mutator extends IForgeRegistryEntry.Impl <Mutator> {
     public enum MutatorType {
         MovementOverride,
         MovementBase,

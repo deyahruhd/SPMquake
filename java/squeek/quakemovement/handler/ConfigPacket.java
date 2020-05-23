@@ -2,13 +2,18 @@ package squeek.quakemovement.handler;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import squeek.quakemovement.ModInfo;
+import squeek.quakemovement.ModQuakeMovement;
 import squeek.quakemovement.config.ModConfig;
 import squeek.quakemovement.config.ModStubConfig;
+import squeek.quakemovement.movement.MovementSet;
+import squeek.quakemovement.movement.QuakeClientPlayer;
 
 public class ConfigPacket implements IMessage, IMessageHandler <ConfigPacket, IMessage> {
     ModStubConfig serverValues;
@@ -29,6 +34,8 @@ public class ConfigPacket implements IMessage, IMessageHandler <ConfigPacket, IM
             public void run() {
                 ModConfig.CLIENT_VALUES = ModConfig.VALUES;
                 ModConfig.VALUES = packet.serverValues;
+
+                QuakeClientPlayer.movementPhysics = new MovementSet (ModConfig.VALUES.MOVEMENT_SET);
             }});
 
         return null;

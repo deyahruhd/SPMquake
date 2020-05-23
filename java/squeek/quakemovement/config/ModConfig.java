@@ -57,8 +57,9 @@ public class ModConfig
 	private static final String RAMP_JUMP_SCALE = "rampJumpScaling";
 	private static final double RAMP_JUMP_SCALE_DEFAULT = 0.98;
 
-	private static final String ARMOR_REQ_NAME = "armorRequirement";
-	private static final String ARMOR_REQ_DEFAULT = "";
+	private static final String MOVEMENT_SET_JSON = "movementSet";
+	private static final String MOVEMENT_SET_JSON_DEFAULT =
+			"{\"base\": \"spmquake:qani_movement\", \"overrides\": [\"spmquake:cpm_airsteer\"], \"passives\": [\"spmquake:ground_boost\", \"spmquake:ramp_jump\", \"spmquake:wall_clip\"]}";
 
 	public static Configuration config = null;
 	public static ModStubConfig VALUES;
@@ -90,7 +91,7 @@ public class ModConfig
 				config.get(CATEGORY_MOVEMENT, WALL_CLIP_TIME, WALL_CLIP_TIME_DEFAULT, "number of milliseconds during which a player's momentum is preserved after a jump").getInt(WALL_CLIP_TIME_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, RAMP_JUMP_SCALE, RAMP_JUMP_SCALE_DEFAULT, "scaling of ramp jump speed after hitting stairs").setMinValue (0.0).setMaxValue (1.0).getDouble (RAMP_JUMP_SCALE_DEFAULT),
 				(float) (config.get(CATEGORY_MOVEMENT, INCREASED_FALL_DISTANCE_NAME, INCREASED_FALL_DISTANCE_DEFAULT, "increases the distance needed to fall in order to take fall damage; this is a server-side setting").getDouble(INCREASED_FALL_DISTANCE_DEFAULT)),
-				config.get(CATEGORY_MOVEMENT, ARMOR_REQ_NAME, ARMOR_REQ_DEFAULT, "the fully-qualified name of an armor piece that should activate the movement for a player (for example, \"minecraft:diamond_boots\")").getString()
+				config.get(CATEGORY_MOVEMENT, MOVEMENT_SET_JSON, MOVEMENT_SET_JSON_DEFAULT, "the JSON string representation of a combination of movement mutators").getString()
 		);
 
 		save();
@@ -114,7 +115,7 @@ public class ModConfig
 				VALUES.WALL_CLIP_TIME,
 				VALUES.RAMP_JUMP_SCALE,
 				VALUES.INCREASED_FALL_DISTANCE,
-				VALUES.ARMOR_REQ);
+				VALUES.MOVEMENT_SET);
 		save ();
 	}
 
