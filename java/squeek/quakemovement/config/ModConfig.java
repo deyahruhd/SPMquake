@@ -37,7 +37,7 @@ public class ModConfig
 	private static final double Q3_MAX_AIR_ACCEL_PER_TICK_DEFAULT = Double.MAX_VALUE;
 
 	private static final String CPM_AIR_STEER_ACCELERATE_NAME = "airSteerAccelerate";
-	private static final double CPM_AIR_STEER_ACCELERATE_DEFAULT = 12.0D;
+	private static final double CPM_AIR_STEER_ACCELERATE_DEFAULT = 0.125D;
 
 	private static final String CPM_AIR_UNDERSTEER_NAME = "airUndersteer";
 	private static final double CPM_AIR_UNDERSTEER_DEFAULT = 0.8D;
@@ -49,7 +49,7 @@ public class ModConfig
 	private static final double OVERSPEED_EXHAUST_SCALE_DEFAULT = 0.15D;
 
 	private static final String KNOCKBACK_TIME = "maxKnockbackSlickTime";
-	private static final int KNOCKBACK_TIME_DEFAULT = 250;
+	private static final int KNOCKBACK_TIME_DEFAULT = 400;
 
 	private static final String WALL_CLIP_TIME = "maxWallClipTime";
 	private static final int WALL_CLIP_TIME_DEFAULT = 400;
