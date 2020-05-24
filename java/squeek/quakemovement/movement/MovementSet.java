@@ -13,7 +13,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class MovementSet {
-    private static Gson gson = new Gson ();
+    public static final Gson gson = new Gson ();
+    public static final String VANILLA_MOVEMENT = "{\"base\":\"vanilla\",\"overrides\":[],\"passives\":[]}";
     public SortedSet<Mutator> mutators = new TreeSet<> (new Mutator.MutatorComparator ());
 
     private Mutator movementBase = null;
@@ -56,7 +57,7 @@ public class MovementSet {
 
     public String marshal () {
         if (mutators.size () == 0)
-            return "{\"base\":\"vanilla\"}";
+            return VANILLA_MOVEMENT;
 
         ArrayList <String> overrides = new ArrayList<>();
         ArrayList <String> passives  = new ArrayList<>();
@@ -79,23 +80,23 @@ public class MovementSet {
         return gson.toJson (msr);
     }
 
-    private class MovementSetRepresentation {
-        MovementSetRepresentation (String base, String [] overrides, String [] passives) {
+    public static class MovementSetRepresentation {
+        public MovementSetRepresentation (String base, String [] overrides, String [] passives) {
             this.base = base;
 
             if (overrides == null || overrides.length == 0)
-                this.overrides = null;
+                this.overrides = new String [0];
             else
                 this.overrides = overrides;
 
             if (passives == null || overrides.length == 0)
-                this.passives = null;
+                this.passives = new String [0];
             else
-                this.passives = overrides;
+                this.passives = passives;
         }
 
-        String base;
-        String [] overrides;
-        String [] passives;
+        public final String base;
+        public final String [] overrides;
+        public final String [] passives;
     }
 }

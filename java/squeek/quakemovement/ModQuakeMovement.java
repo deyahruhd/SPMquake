@@ -1,7 +1,9 @@
 package squeek.quakemovement;
 
+import com.google.common.collect.Lists;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -16,16 +18,22 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import squeek.quakemovement.config.ModConfig;
 import squeek.quakemovement.handler.ConfigPacket;
 import squeek.quakemovement.handler.DrawHUDHandler;
 import squeek.quakemovement.handler.NetworkHandler;
+import squeek.quakemovement.movement.MovementSet;
 import squeek.quakemovement.movement.QuakeClientPlayer;
 import squeek.quakemovement.movement.mutators.Mutator;
 import squeek.quakemovement.movement.mutators.impl.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mod(modid = ModInfo.MODID, version = ModInfo.VERSION, name="SPMquake", acceptedMinecraftVersions="[1.12.2]", dependencies = "after:squeedometer", guiFactory = ModInfo.CONFIG_GUI_FACTORY_CLASS)
 public class ModQuakeMovement
@@ -104,6 +112,76 @@ public class ModQuakeMovement
 		mutatorRegistry.register (new WallClipMutator ().setRegistryName          (new ResourceLocation (ModInfo.MODID, "wall_clip")));
 		mutatorRegistry.register (new WSWDashMutator ().setRegistryName           (new ResourceLocation (ModInfo.MODID, "warsow_dash")));
 		mutatorRegistry.register (new ViewBobMutator ().setRegistryName           (new ResourceLocation (ModInfo.MODID, "view_bobbing")));
+	}
+
+	private static String getQMovementTag (ItemStack item) {
+		return item.hasTagCompound () ? item.getTagCompound ().getString ("QMovement") : MovementSet.VANILLA_MOVEMENT;
+	}
+
+	private static String unmarshalIntoSet (String marshalled, String inBase, List<String> overrides, List <String> passives) {
+		MovementSet.MovementSetRepresentation repr = MovementSet.gson.fromJson (marshalled, MovementSet.MovementSetRepresentation.class);
+
+		if (repr == null)
+			return inBase;
+
+		if (repr.base != null && ! repr.base.equals ("vanilla") && inBase.equals ("vanilla"))
+			inBase = repr.base;
+
+		overrides.addAll(Lists.newArrayList(repr.overrides));
+		passives.addAll(Lists.newArrayList(repr.passives));
+		return inBase;
+	}
+
+	ItemStack previousHeldItem = ItemStack.EMPTY;
+	ItemStack previousBoots = ItemStack.EMPTY;
+	String currentHeldItemMovement = MovementSet.VANILLA_MOVEMENT;
+	String currentBootsMovement = MovementSet.VANILLA_MOVEMENT;
+
+	@SubscribeEvent
+	public void playerTick (TickEvent.PlayerTickEvent tick) {
+		if (tick.side != Side.CLIENT || tick.phase != TickEvent.Phase.START)
+			return;
+
+		EntityPlayer player = tick.player;
+		ArrayList<ItemStack> playerEquipment = Lists.newArrayList (player.getEquipmentAndArmor ());
+		ItemStack heldItem = playerEquipment.get (0);
+		ItemStack boots    = playerEquipment.get (2);
+
+		String heldItemMovementOverride = getQMovementTag (heldItem);
+		String bootsMovementOverride = getQMovementTag (boots);
+
+		if (
+			// Primary equipped item or boots were swapped
+				((heldItem != previousHeldItem && ! heldItem.getItem ().isValidArmor (heldItem, EntityEquipmentSlot.FEET, player)) || boots != previousBoots)
+				&&
+			// The movement physics of the held item or boots is different from the current ones
+				(! heldItemMovementOverride.equals (currentHeldItemMovement) || ! bootsMovementOverride.equals (currentBootsMovement))) {
+			ArrayList <String> overrides = new ArrayList <> ();
+			ArrayList <String> passives =  new ArrayList<> ();
+			String base = "vanilla";
+			base = unmarshalIntoSet (heldItemMovementOverride, base, overrides, passives);
+			base = unmarshalIntoSet (bootsMovementOverride, base, overrides, passives);
+			base = unmarshalIntoSet (ModConfig.VALUES.MOVEMENT_SET, base, overrides, passives);
+
+			currentHeldItemMovement = heldItemMovementOverride;
+			currentBootsMovement = bootsMovementOverride;
+
+			if (base.equals ("vanilla")) {
+				QuakeClientPlayer.movementPhysics.mutators.clear ();
+			} else {
+				MovementSet.MovementSetRepresentation mutatedSet = new MovementSet.MovementSetRepresentation (
+						base,
+						overrides.toArray (new String[0]),
+						passives.toArray  (new String[0]));
+
+				String mutatedSetStr = MovementSet.gson.toJson (mutatedSet, MovementSet.MovementSetRepresentation.class);
+
+				QuakeClientPlayer.movementPhysics = new MovementSet (mutatedSetStr);
+			}
+		}
+
+		previousHeldItem = heldItem;
+		previousBoots = boots;
 	}
 
 	public static boolean shouldDoQuakeMovement (EntityPlayer player) {

@@ -18,8 +18,8 @@ public class WSWDashMutator extends Mutator {
             wishdir = QuakeClientPlayer.getMovementDirection (player, 0.f, 1.f).normalize ();
         double playerVel = prevPlayerVel.length ();
 
-        if (playerVel < 0.4165625)
-            playerVel = 0.4165625;
+        if (playerVel < wishspeed * 640.0 / 320.0)
+            playerVel = wishspeed * 640.0 / 320.0;
 
         wishdir = wishdir.scale (playerVel);
 
@@ -52,7 +52,7 @@ public class WSWDashMutator extends Mutator {
     @Nullable
     @Override
     public Set<MovementInput> listenTo() {
-        return Sets.immutableEnumSet (MovementInput.SNEAK);
+        return Sets.immutableEnumSet (MovementInput.ITEM_USE);
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStairs;
 import net.minecraft.block.state.IBlockState;
@@ -13,6 +14,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -21,6 +23,7 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import squeek.quakemovement.ModInfo;
 import squeek.quakemovement.ModQuakeMovement;
 import squeek.quakemovement.config.ModConfig;
 import squeek.quakemovement.handler.NetworkHandler;
@@ -33,6 +36,9 @@ public class QuakeClientPlayer {
 	private static Method setIsJumping = null;
 
 	public static MovementSet movementPhysics = new MovementSet ();
+
+	private static ItemStack previousBoots    = ItemStack.EMPTY;
+	private static ItemStack previousHeldItem = ItemStack.EMPTY;
 
 	static {
 		try {
@@ -120,6 +126,7 @@ public class QuakeClientPlayer {
 		} else {
 			// get all relevant movement values
 			float wishspeed = (sidemove != 0.0F || forwardmove != 0.0F) ? quake_getMoveSpeed(player) : 0.0F;
+			float realWishSpeed = quake_getMoveSpeed (player);
 
 			for (Mutator m : movementPhysics.mutators) {
 				m.preMove ((EntityPlayerSP) player, wishdir, input);
@@ -128,10 +135,16 @@ public class QuakeClientPlayer {
 			doAccel (player, wishdir, wishspeed, input);
 
 			if (player.isSneaking ())
-				doAccel (player, wishdir, wishspeed, Mutator.MovementInput.SNEAK);
+				doAccel (player, wishdir, realWishSpeed, Mutator.MovementInput.SNEAK);
 
 			if (QuakeClientPlayer.isJumping (player) && player.onGround)
-				doAccel (player, wishdir, wishspeed, Mutator.MovementInput.JUMP);
+				doAccel (player, wishdir, realWishSpeed, Mutator.MovementInput.JUMP);
+
+			if (Minecraft.getMinecraft ().gameSettings.keyBindUseItem.isKeyDown ())
+				doAccel (player, wishdir, realWishSpeed, Mutator.MovementInput.ITEM_USE);
+
+			if (Minecraft.getMinecraft ().gameSettings.keyBindAttack.isPressed ())
+				doAccel (player, wishdir, realWishSpeed, Mutator.MovementInput.ITEM_SWING);
 
 			// apply velocity
 			player.move(MoverType.SELF, player.motionX, player.motionY, player.motionZ);
