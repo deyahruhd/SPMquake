@@ -49,16 +49,6 @@ public class GroundBoostMutator extends Mutator {
         return MutatorType.MovementPassive;
     }
 
-    public static void setEntityVelocity(Entity entity, double x, double y, double z) {
-        if (entity instanceof EntityPlayerSP) {
-            double speed = QuakeClientPlayer.getSpeed ((EntityPlayer) entity);
-            double scale = 1.0 / ((speed + 1.0) * (speed + 1.0));
-
-            entity.addVelocity(x * scale, y * scale, z * scale);
-        } else
-            entity.setVelocity(x, y, z);
-    }
-
     public static void applyExplosionToSPPlayer (Explosion e, SPacketExplosion packet) {
         float str = packet.getStrength ();
         float dist = packet.getStrength () + 2.5f;

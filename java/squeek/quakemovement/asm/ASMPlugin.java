@@ -107,7 +107,7 @@ public class ASMPlugin implements IFMLLoadingPlugin, IClassTransformer
 
 			AbstractInsnNode setVel = findLastInstructionWithOpcode (method, Opcodes.INVOKEVIRTUAL);
 
-			method.instructions.insertBefore(setVel, new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_GROUNDBOOSTMUTATOR), "setEntityVelocity", "(L" + entityName + ";DDD)V", false));
+			method.instructions.insertBefore(setVel, new MethodInsnNode(Opcodes.INVOKESTATIC, toInternalClassName(CLASS_QUAKE_CLIENT_PLAYER), "setEntityVelocity", "(L" + entityName + ";DDD)V", false));
 			method.instructions.remove (setVel);
 
 			MethodNode method2;

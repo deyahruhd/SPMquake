@@ -316,6 +316,16 @@ public class QuakeClientPlayer {
 		}
 	}
 
+	public static void setEntityVelocity(Entity entity, double x, double y, double z) {
+		if (entity instanceof EntityPlayerSP) {
+			double speed = QuakeClientPlayer.getSpeed ((EntityPlayer) entity);
+			double scale = 1.0 / ((speed + 1.0) * (speed + 1.0));
+
+			entity.addVelocity(x * scale, y * scale, z * scale);
+		} else
+			entity.setVelocity(x, y, z);
+	}
+
 	public static Vec3d getStairNormal(World w, Vec3d pos, double scanWidth, double playerWidth) {
 		Vec3d stairNormal = Vec3d.ZERO;
 
