@@ -109,6 +109,7 @@ public class ModQuakeMovement
 		mutatorRegistry.register (new CPMAirSteerMutator ().setRegistryName       (new ResourceLocation (ModInfo.MODID, "cpm_airsteer")));
 		mutatorRegistry.register (new GroundBoostMutator ().setRegistryName       (new ResourceLocation (ModInfo.MODID, "ground_boost")));
 		mutatorRegistry.register (new RampJumpMutator ().setRegistryName          (new ResourceLocation (ModInfo.MODID, "ramp_jump")));
+		mutatorRegistry.register (new OverbounceMutator ().setRegistryName        (new ResourceLocation (ModInfo.MODID, "overbounce")));
 		mutatorRegistry.register (new WallClipMutator ().setRegistryName          (new ResourceLocation (ModInfo.MODID, "wall_clip")));
 		mutatorRegistry.register (new WSWDashMutator ().setRegistryName           (new ResourceLocation (ModInfo.MODID, "warsow_dash")));
 		mutatorRegistry.register (new ViewBobMutator ().setRegistryName           (new ResourceLocation (ModInfo.MODID, "view_bobbing")));
