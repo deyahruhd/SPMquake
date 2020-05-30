@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 public class OverbounceMutator extends Mutator {
+    public static final double OB_MAX_HEIGHT = (15.0 * 4.30 / 320.0);
     @Override
     public boolean groundMove(EntityPlayerSP player, Vec3d wishdir, float wishspeed, @Nullable MovementInput input) {
         return false;
@@ -30,8 +31,6 @@ public class OverbounceMutator extends Mutator {
         Vec3d playerHorVel = new Vec3d (player.motionX, 0.0, player.motionZ);
         double velMagnitude    = playerVel.length ();
         double horVelMagnitude = playerHorVel.length ();
-
-        double OB_MAX_HEIGHT = (15 * 4.30 / 320);
 
         if ((player.posY % 1.0) < OB_MAX_HEIGHT && (player.posY % 1.0) > 0.0 && horVelMagnitude <= (21.30 / 20.0)) {
             // We want to find any block directly below the player (thus activating an overbounce)

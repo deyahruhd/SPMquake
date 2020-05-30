@@ -13,6 +13,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import squeek.quakemovement.ModQuakeMovement;
 import squeek.quakemovement.config.ModConfig;
+import squeek.quakemovement.helper.MathHelper;
+import squeek.quakemovement.movement.QuakeClientPlayer;
 
 public class DrawHUDHandler {
     private static final ResourceLocation JUMP_INDICATORS = new ResourceLocation("spmquake:textures/gui/jumpindicators.png");
@@ -58,6 +60,9 @@ public class DrawHUDHandler {
             GlStateManager.enableAlpha();
 
             drawTexturedModalRect(l / 2 - 7, i1 / 2 - 7, 32, 32, 16, 16);
+
+            if (MathHelper.predictOverbounce (Minecraft.getMinecraft ().player))
+                drawTexturedModalRect (l / 2 - 7 + 32, i1 / 2 - 7 + 16, 48, 48, 16, 16);
 
             GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
