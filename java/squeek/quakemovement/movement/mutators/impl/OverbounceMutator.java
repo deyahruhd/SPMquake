@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 public class OverbounceMutator extends Mutator {
-    public static final double OB_MAX_HEIGHT = (15.0 * 4.30 / 320.0);
+    public static final double OB_MAX_HEIGHT = (7.0 * 4.30 / 320.0);
     @Override
     public boolean groundMove(EntityPlayerSP player, Vec3d wishdir, float wishspeed, @Nullable MovementInput input) {
         return false;
@@ -38,13 +38,11 @@ public class OverbounceMutator extends Mutator {
             BlockPos floorBlock = MathHelper.getImminentCollisionBlock (player.world, player, playerVel, false);
 
             if (floorBlock != null && player.world.getBlockState (floorBlock).isFullBlock () && floorBlock.getY () == (int) Math.floor (player.posY - 1.0)) {
-                QuakeClientPlayer.minecraft_ApplyGravity (player);
-
                 Vec3d clipped = q3ClipVel (playerVel, new Vec3d (0.0, 1.0, 0.0), 1.001f);
                 Vec3d newVel = clipped.normalize ().scale (velMagnitude);
 
                 player.motionX = newVel.x;
-                player.motionY = newVel.y * 1.3333333;
+                player.motionY = newVel.y;
                 player.motionZ = newVel.z;
 
                 QuakeClientPlayer.minecraft_ApplyGravity (player);

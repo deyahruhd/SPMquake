@@ -113,7 +113,7 @@ public class MathHelper {
                                     ((float) ModConfig.VALUES.KNOCKBACK_SLICK_TIME * GroundBoostMutator.explosionStr), 0.00F, 1.0F));
                 playerVelY -= scaledGravity;
 
-                playerVelY *= 0.9800000190734863D;
+                // playerVelY *= 0.9800000190734863D;
 
                 steps ++;
             }

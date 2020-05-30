@@ -367,7 +367,7 @@ public class QuakeClientPlayer {
 		}
 
 		// air resistance
-		player.motionY *= 0.9800000190734863D;
+		//player.motionY *= 0.9800000190734863D;
 	}
 
 	public static void minecraft_ApplyFriction(EntityPlayer player, float momentumRetention) {
