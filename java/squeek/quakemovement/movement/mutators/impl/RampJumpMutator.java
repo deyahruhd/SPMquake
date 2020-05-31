@@ -45,6 +45,8 @@ public class RampJumpMutator extends Mutator {
                 else
                     pos = pos.add(0.0, -0.11, 0.0);
 
+            previousVel = new Vec3d (previousVel.x, Math.signum (previousVel.y) * (3.92 - 3.92 * Math.exp (-0.252534 * Math.abs (previousVel.y))), previousVel.z);
+
             Vec3d n = QuakeClientPlayer.getStairNormal (player.world, player, previousVel, previousPos);
             Vec3d d = previousVel.normalize ();
 
