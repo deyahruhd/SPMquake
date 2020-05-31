@@ -13,6 +13,7 @@ import squeek.quakemovement.movement.mutators.Mutator;
 import squeek.quakemovement.movement.mutators.impl.GroundBoostMutator;
 import squeek.quakemovement.movement.mutators.impl.OverbounceMutator;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,16 +22,20 @@ public class MathHelper {
         return (Math.log (x + Math.exp (-pow)) + pow) / pow;
     }
 
-    public static BlockPos getImminentCollisionBlock (World world, EntityPlayer player, Vec3d vel, boolean doTop) {
-        double playerWidth = player.width * 0.99 / 2.0;
+    public static BlockPos getImminentCollisionBlock (World world, EntityPlayer player, Vec3d vel, @Nullable Vec3d pos, boolean doTop) {
+        Vec3d playerPos = pos;
+        if (playerPos == null)
+            playerPos = player.getPositionVector ();
+
+        double playerWidth = (player.width / 2.0);
         RayTraceResult lowerBlock = null, upperBlock = null;
 
         // Check lower bounding box (corresponding with lower)
         List<Vec3d> vecs = new ArrayList <>();
-        vecs.add (player.getPositionVector ().add ( playerWidth, 0.0,  playerWidth));
-        vecs.add (player.getPositionVector ().add ( playerWidth, 0.0, -playerWidth));
-        vecs.add (player.getPositionVector ().add (-playerWidth, 0.0, -playerWidth));
-        vecs.add (player.getPositionVector ().add (-playerWidth, 0.0,  playerWidth));
+        vecs.add (playerPos.add ( playerWidth, 0.0,  playerWidth));
+        vecs.add (playerPos.add ( playerWidth, 0.0, -playerWidth));
+        vecs.add (playerPos.add (-playerWidth, 0.0, -playerWidth));
+        vecs.add (playerPos.add (-playerWidth, 0.0,  playerWidth));
 
         for (Vec3d v : vecs) {
             lowerBlock = world.rayTraceBlocks (v, v.add (vel));
@@ -43,10 +48,10 @@ public class MathHelper {
 
         if (doTop) {
             vecs.clear();
-            vecs.add(player.getPositionVector().add(playerWidth, player.height, playerWidth));
-            vecs.add(player.getPositionVector().add(playerWidth, player.height, -playerWidth));
-            vecs.add(player.getPositionVector().add(-playerWidth, player.height, -playerWidth));
-            vecs.add(player.getPositionVector().add(-playerWidth, player.height, playerWidth));
+            vecs.add (playerPos.add ( playerWidth, player.height,  playerWidth));
+            vecs.add (playerPos.add ( playerWidth, player.height, -playerWidth));
+            vecs.add (playerPos.add (-playerWidth, player.height, -playerWidth));
+            vecs.add (playerPos.add (-playerWidth, player.height,  playerWidth));
 
             for (Vec3d v : vecs) {
                 upperBlock = world.rayTraceBlocks (v, v.add (vel));
@@ -58,13 +63,9 @@ public class MathHelper {
             }
         }
 
-        // Exclusive or between the two bounding boxes. If both upper and lower traces results in a collided block, then
-        // the player naturally collides with both of them, and so we treat them as a solid block wall
-
-        // This condition is primarily for ramp jumps
-        if (lowerBlock != null && upperBlock == null)
+        if (lowerBlock != null)
             return lowerBlock.getBlockPos ();
-        else if (lowerBlock == null && upperBlock != null)
+        else if (upperBlock != null)
             return upperBlock.getBlockPos ();
         else
             return null;
@@ -82,7 +83,7 @@ public class MathHelper {
             return false;
 
         // Get the block below the player
-        BlockPos pos = getImminentCollisionBlock (player.world, player, new Vec3d (0.0, -256.0, 0.0), false);
+        BlockPos pos = getImminentCollisionBlock (player.world, player, new Vec3d (0.0, -256.0, 0.0), null, false);
 
         if (! player.onGround && player.fallDistance >= 1.5 && pos != null && player.world.getBlockState (pos).isFullBlock ()) {
             int steps = 0;

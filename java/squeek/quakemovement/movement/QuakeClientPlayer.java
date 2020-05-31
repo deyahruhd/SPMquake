@@ -326,29 +326,24 @@ public class QuakeClientPlayer {
 			entity.setVelocity(x, y, z);
 	}
 
-	public static Vec3d getStairNormal(World w, Vec3d pos, double scanWidth, double playerWidth) {
-		Vec3d stairNormal = Vec3d.ZERO;
+	public static Vec3d getStairNormal(World world, EntityPlayer player, Vec3d pos, Vec3d vel) {
+		BlockPos stair = squeek.quakemovement.helper.MathHelper.getImminentCollisionBlock (world, player, pos, vel, true);
+		if (stair == null)
+			return null;
 
-		for (BlockPos scanPos : new BlockPos[]{
-				new BlockPos(new Vec3d(pos.x + scanWidth, pos.y, pos.z + scanWidth)),
-				new BlockPos(new Vec3d(pos.x + scanWidth, pos.y, pos.z - scanWidth)),
-				new BlockPos(new Vec3d(pos.x - scanWidth, pos.y, pos.z - scanWidth)),
-				new BlockPos(new Vec3d(pos.x - scanWidth, pos.y, pos.z + scanWidth))}) {
-			IBlockState state = w.getBlockState(scanPos);
+		IBlockState state = world.getBlockState (stair);
+		if (state.getBlock() instanceof BlockStairs) {
+			EnumFacing face = state.getValue(BlockStairs.FACING);
 
-			if (state.getBlock() instanceof BlockStairs) {
-				EnumFacing face = state.getValue(BlockStairs.FACING);
+			Vec3i horizontalDir = face.getDirectionVec();
+			int verticalDir = state.getValue(BlockStairs.HALF) == BlockStairs.EnumHalf.TOP
+					? -1
+					: 1;
 
-				Vec3i horizontalDir = face.getDirectionVec();
-				int verticalDir = state.getValue(BlockStairs.HALF) == BlockStairs.EnumHalf.TOP
-						? -1
-						: 1;
-
-				stairNormal = stairNormal.add(new Vec3d(-horizontalDir.getX(), verticalDir, -horizontalDir.getZ()));
-			}
+			return new Vec3d(-horizontalDir.getX(), verticalDir, -horizontalDir.getZ()).normalize ();
 		}
 
-		return (stairNormal == Vec3d.ZERO) ? null : stairNormal.normalize();
+		return null;
 	}
 
 	public static void minecraft_ApplyGravity(EntityPlayer player) {

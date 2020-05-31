@@ -35,7 +35,7 @@ public class OverbounceMutator extends Mutator {
         if ((player.posY % 1.0) < OB_MAX_HEIGHT && (player.posY % 1.0) > 0.0 && horVelMagnitude <= (21.30 / 20.0)) {
             // We want to find any block directly below the player (thus activating an overbounce)
 
-            BlockPos floorBlock = MathHelper.getImminentCollisionBlock (player.world, player, playerVel, false);
+            BlockPos floorBlock = MathHelper.getImminentCollisionBlock (player.world, player, playerVel, null, false);
 
             if (floorBlock != null && player.world.getBlockState (floorBlock).isFullBlock () && floorBlock.getY () == (int) Math.floor (player.posY - 1.0)) {
                 Vec3d clipped = q3ClipVel (playerVel, new Vec3d (0.0, 1.0, 0.0), 1.001f);
