@@ -3,9 +3,9 @@ package squeek.quakemovement.movement.mutators.impl;
 import com.sun.javafx.geom.Vec2d;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import squeek.quakemovement.config.ModConfig;
+import squeek.quakemovement.helper.MathHelper;
 import squeek.quakemovement.movement.QuakeClientPlayer;
 import squeek.quakemovement.movement.mutators.Mutator;
 
@@ -63,6 +63,8 @@ public abstract class QMovementBase extends Mutator {
 
     @Override
     public final boolean preMove(EntityPlayerSP player, Vec3d wishdir, @Nullable MovementInput input) {
+        OverbounceMutator.obPrediction = MathHelper.predictOverbounce (player);
+
         float momentumRetention = QuakeClientPlayer.getSlipperiness (player);
 
         if (player.onGround && ! QuakeClientPlayer.isJumping (player))

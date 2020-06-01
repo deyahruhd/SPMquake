@@ -27,7 +27,7 @@ public class MathHelper {
         if (playerPos == null)
             playerPos = player.getPositionVector ();
 
-        double playerWidth = (player.width / 2.0);
+        double playerWidth = (player.width / 2.0) * 0.999;
         RayTraceResult lowerBlock = null, upperBlock = null;
 
         // Check lower bounding box (corresponding with lower)

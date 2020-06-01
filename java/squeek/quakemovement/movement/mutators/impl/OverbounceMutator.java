@@ -13,6 +13,7 @@ import java.util.Set;
 
 public class OverbounceMutator extends Mutator {
     public static final double OB_MAX_HEIGHT = (7.0 * 4.30 / 320.0);
+    public static boolean obPrediction = false;
     @Override
     public boolean groundMove(EntityPlayerSP player, Vec3d wishdir, float wishspeed, @Nullable MovementInput input) {
         return false;
