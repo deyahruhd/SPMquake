@@ -75,7 +75,21 @@ public class QuakeClientPlayer {
 	 */
 	public static boolean quake_moveEntityWithHeading(EntityPlayer player, float sidemove, float upmove, float forwardmove) {
 		ViewBobMutator viewBobbing = (ViewBobMutator) movementPhysics.mutators.last();
-		Vec3d wishdir = getMovementDirection(player, sidemove, forwardmove).normalize();
+
+		float wishspeed = (sidemove != 0.0F || forwardmove != 0.0F) ? quake_getMoveSpeed(player) : 0.0F;
+		// Get wish dir as specified by movement keys
+		Vec3d movementKeyDir = getMovementDirection (player, sidemove, forwardmove);
+
+		// Add in Y component if nerfAutoHop is true, and normalize
+		Vec3d playerWishdir = new Vec3d (movementKeyDir.x,
+										 ModConfig.VALUES.NERF_AUTO_HOP ? (QuakeClientPlayer.isJumping (player) ? 1.0 : 0.0) : 0.0,
+										 movementKeyDir.z).normalize ().scale (wishspeed);
+
+		// Drop Y component
+		Vec3d wishdir = movementKeyDir.normalize ();
+
+		// Adjust wishspeed
+		wishspeed = (float) new Vec3d (playerWishdir.x, 0.0, playerWishdir.z).length ();
 
 		Mutator.MovementInput input = null;
 		if (sidemove != 0.f || forwardmove != 0.f) {
@@ -123,7 +137,6 @@ public class QuakeClientPlayer {
 			return false;
 		} else {
 			// get all relevant movement values
-			float wishspeed = (sidemove != 0.0F || forwardmove != 0.0F) ? quake_getMoveSpeed(player) : 0.0F;
 			float realWishSpeed = quake_getMoveSpeed (player);
 
 			for (Mutator m : movementPhysics.mutators) {

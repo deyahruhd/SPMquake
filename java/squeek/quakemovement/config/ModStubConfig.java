@@ -21,6 +21,8 @@ public class ModStubConfig {
     // number of milliseconds after a jump that the player will maintain their momentum into a wall
     public final int WALL_CLIP_TIME;
 
+    public final boolean NERF_AUTO_HOP;
+
     // multiplier for ramp jump elasticity; set to 0.0 to completely disable ramp jumps
     public final double RAMP_JUMP_SCALE;
 
@@ -39,8 +41,9 @@ public class ModStubConfig {
                           double cpmAirUndersteer,
                           int slickTime,
                           int clipTime,
-                          double fallInc,
+                          boolean nerfAutoHop,
                           double rampJumpScale,
+                          double fallInc,
                           String movementSetJson) {
         ENABLED = enable;
         JUMP_INDICATORS_MODE = jumpIndicator;
@@ -56,6 +59,8 @@ public class ModStubConfig {
 
         KNOCKBACK_SLICK_TIME = slickTime;
         WALL_CLIP_TIME = clipTime;
+
+        NERF_AUTO_HOP = nerfAutoHop;
 
         RAMP_JUMP_SCALE = rampJumpScale;
 
@@ -83,6 +88,8 @@ public class ModStubConfig {
         buf.writeInt (KNOCKBACK_SLICK_TIME);
         buf.writeInt (WALL_CLIP_TIME);
 
+        buf.writeBoolean (NERF_AUTO_HOP);
+
         buf.writeDouble (RAMP_JUMP_SCALE);
 
         buf.writeDouble (INCREASED_FALL_DISTANCE);
@@ -108,6 +115,8 @@ public class ModStubConfig {
 
                 buf.readInt (), // knockback slick ticks
                 buf.readInt (), // wall clip ticks
+
+                buf.readBoolean(), // nerf auto hop
 
                 buf.readDouble (), // ramp jump scale factor
 
