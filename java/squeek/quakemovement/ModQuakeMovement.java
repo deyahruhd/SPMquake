@@ -85,12 +85,6 @@ public class ModQuakeMovement
 	}
 
 	@SubscribeEvent
-	public void playerJump (LivingEvent.LivingJumpEvent event) {
-		if (event.getEntity () instanceof EntityPlayer && event.getEntity().world.isRemote && shouldDoQuakeMovement ((EntityPlayer) event.getEntity()))
-			QuakeClientPlayer.doHungerJump ((EntityPlayer) event.getEntity ());
-	}
-
-	@SubscribeEvent
 	public void createRegistries (RegistryEvent.NewRegistry event) {
 		mutatorRegistry = new RegistryBuilder<Mutator> ()
 				.setName (new ResourceLocation (ModInfo.MODID, "mutator_registry"))

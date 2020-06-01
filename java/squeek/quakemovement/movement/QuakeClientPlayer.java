@@ -23,11 +23,9 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
-import squeek.quakemovement.ModInfo;
 import squeek.quakemovement.ModQuakeMovement;
 import squeek.quakemovement.config.ModConfig;
 import squeek.quakemovement.handler.NetworkHandler;
-import squeek.quakemovement.handler.HungerJumpPacket;
 import squeek.quakemovement.movement.mutators.Mutator;
 import squeek.quakemovement.movement.mutators.impl.*;
 
@@ -221,10 +219,6 @@ public class QuakeClientPlayer {
 			return false;
 
 		return moveRelative((EntityPlayer) entity, sidemove, forwardmove, upmove, friction);
-	}
-
-	public static void doHungerJump(EntityPlayer e) {
-		NetworkHandler.INSTANCE.sendToServer(new HungerJumpPacket(Minecraft.getMinecraft().player));
 	}
 
 	public static void afterJump(EntityPlayer player) {

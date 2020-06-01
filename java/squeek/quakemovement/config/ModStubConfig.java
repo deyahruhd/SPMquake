@@ -16,12 +16,6 @@ public class ModStubConfig {
     public final double CPM_AIR_STEER_ACCELERATE;
     public final double CPM_AIR_UNDERSTEER;
 
-    // overspeed for the hunger jump caps in blocks/sec, if the player is above this cap then
-    // they will receive exhaustion on a scale of log squared speed, multiplied by the exhaustion scale
-    public final double OVERSPEED;
-    // set overspeed exhaustion scale to 0.0 to disable
-    public final double OVERSPEED_EXHAUSTION_SCALE;
-
     // number of milliseconds that a player will receive ground slick for after taking explosion knockback
     public final int KNOCKBACK_SLICK_TIME;
     // number of milliseconds after a jump that the player will maintain their momentum into a wall
@@ -43,8 +37,6 @@ public class ModStubConfig {
                           double q3MaxAccel,
                           double cpmAirSteerAccel,
                           double cpmAirUndersteer,
-                          double overspeed,
-                          double overspeedScale,
                           int slickTime,
                           int clipTime,
                           double fallInc,
@@ -61,9 +53,6 @@ public class ModStubConfig {
 
         CPM_AIR_STEER_ACCELERATE = cpmAirSteerAccel;
         CPM_AIR_UNDERSTEER = cpmAirUndersteer;
-
-        OVERSPEED = overspeed;
-        OVERSPEED_EXHAUSTION_SCALE = overspeedScale;
 
         KNOCKBACK_SLICK_TIME = slickTime;
         WALL_CLIP_TIME = clipTime;
@@ -91,9 +80,6 @@ public class ModStubConfig {
         buf.writeDouble (CPM_AIR_STEER_ACCELERATE);
         buf.writeDouble (CPM_AIR_UNDERSTEER);
 
-        buf.writeDouble (OVERSPEED);
-        buf.writeDouble (OVERSPEED_EXHAUSTION_SCALE);
-
         buf.writeInt (KNOCKBACK_SLICK_TIME);
         buf.writeInt (WALL_CLIP_TIME);
 
@@ -119,9 +105,6 @@ public class ModStubConfig {
 
                 buf.readDouble (),  // cpm air steer
                 buf.readDouble (),  // cpm air understeer
-
-                buf.readDouble (),  // overspeed minimum
-                buf.readDouble (),  // overspeed scale factor
 
                 buf.readInt (), // knockback slick ticks
                 buf.readInt (), // wall clip ticks

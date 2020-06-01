@@ -42,12 +42,6 @@ public class ModConfig
 	private static final String CPM_AIR_UNDERSTEER_NAME = "airUndersteer";
 	private static final double CPM_AIR_UNDERSTEER_DEFAULT = 0.8D;
 
-	private static final String OVERSPEED = "overspeed";
-	private static final double OVERSPEED_DEFAULT = 6.32D;
-
-	private static final String OVERSPEED_EXHAUST_SCALE = "overspeedScaling";
-	private static final double OVERSPEED_EXHAUST_SCALE_DEFAULT = 0.15D;
-
 	private static final String KNOCKBACK_TIME = "maxKnockbackSlickTime";
 	private static final int KNOCKBACK_TIME_DEFAULT = 400;
 
@@ -85,8 +79,6 @@ public class ModConfig
 				config.get(CATEGORY_MOVEMENT, Q3_MAX_AIR_ACCEL_PER_TICK_NAME, Q3_MAX_AIR_ACCEL_PER_TICK_DEFAULT, "maximum speed attainable per tick when holding forward + a strafe key").getDouble(Q3_MAX_AIR_ACCEL_PER_TICK_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, CPM_AIR_STEER_ACCELERATE_NAME, CPM_AIR_STEER_ACCELERATE_DEFAULT, "acceleration applied while holding only forward").getDouble(CPM_AIR_STEER_ACCELERATE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, CPM_AIR_UNDERSTEER_NAME, CPM_AIR_UNDERSTEER_DEFAULT, "W steering turn radius factor; lower values result in easier W turning, but result in more understeering with sharp turns").setMinValue (0.0).setMaxValue (1.0).getDouble(CPM_AIR_STEER_ACCELERATE_DEFAULT),
-				config.get(CATEGORY_MOVEMENT, OVERSPEED, OVERSPEED_DEFAULT, "minimum speed before receiving hunger costs from oversped jumps").getDouble(OVERSPEED_DEFAULT),
-				config.get(CATEGORY_MOVEMENT, OVERSPEED_EXHAUST_SCALE, OVERSPEED_EXHAUST_SCALE_DEFAULT, "scaling of hunger cost from oversped jumps").getDouble(OVERSPEED_EXHAUST_SCALE_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, KNOCKBACK_TIME, KNOCKBACK_TIME_DEFAULT, "number of milliseconds a player is slicked for after receiving knockback").getInt(KNOCKBACK_TIME_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, WALL_CLIP_TIME, WALL_CLIP_TIME_DEFAULT, "number of milliseconds during which a player's momentum is preserved after a jump").getInt(WALL_CLIP_TIME_DEFAULT),
 				config.get(CATEGORY_MOVEMENT, RAMP_JUMP_SCALE, RAMP_JUMP_SCALE_DEFAULT, "scaling of ramp jump speed after hitting stairs").setMinValue (0.0).setMaxValue (1.0).getDouble (RAMP_JUMP_SCALE_DEFAULT),
@@ -109,8 +101,6 @@ public class ModConfig
 				VALUES.Q3_MAX_AIR_ACCEL_PER_TICK,
 				VALUES.CPM_AIR_STEER_ACCELERATE,
 				VALUES.CPM_AIR_UNDERSTEER,
-				VALUES.OVERSPEED,
-				VALUES.OVERSPEED_EXHAUSTION_SCALE,
 				VALUES.KNOCKBACK_SLICK_TIME,
 				VALUES.WALL_CLIP_TIME,
 				VALUES.RAMP_JUMP_SCALE,
