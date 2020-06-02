@@ -5,27 +5,43 @@ SPMquake
 
 A fork of Squake that brings CPM-style air control, strafejumping, and trickjumping to Minecraft.
 
-***(This mod is functional but still WIP. it's perfectly installable in modded instances but don't expect every new thing to work perfectly. ;) )***
-
 ## What is different about this fork?
 
-The mod is both a reproduction of the movement mechanics of the Challenge Pro Mode Arena mod for Quake 3 Arena, and an attempt to provide measures to balance the mod and bring it more in-line with vanilla survival mechanics.
+The mod aims to reproduce many movement mechanics of the Challenge Pro Mode Arena mod for Quake III Arena.
 
-As such, the mod implements several Quake-specific mechanics not included in Q1/GoldSrc engine derivatives, unlike Squake:
-- CPM-like movement scheme. The movement in this mod is a combination of three air control styles, where diagonal directions (W + A/D) activate Q3A air physics, the sole strafe keys (A/D) activate Q1 air physics ala GoldSrc, and the sole forward and backward keys (W/S) activates an "air steer" mode for adjusting air trajectories..
+Since Quake 3 and Quake 1, and GoldSrc are idTech engine derivative games, they share some movement mechanics that many people may be familiar with, like trimping and bunnyhopping. However, Quake III Arena adds many more movement tricks resulting from its differences to GoldSrc.
+
+A full list of what movement mechanics SPMquake reproduces: 
+- CPM-like movement scheme. The movement in this mod is a combination of three air control styles, where diagonal directions (+forward/+back + +left/+right) activate Q3A air physics, the sole strafe keys (+left/+right) activate Q1 air physics (bunnyhopping), and the sole forward and backward keys (+forward/+back) activates an "air steer" mode for adjusting air trajectories.
+- Quake 3- and Quake 1-exclusive air acceleration. If desired, you can choose to have VQ3 air acceleration (slow and mostly linear, but fast), Q1 air acceleration (air control), or even the anisotropic CPM movement scheme without the unique +forward/+back air-steering mechanic.
 - Wall clipping. This is, in the Q3A engine, a "reintroduction" of a bug where the player can retain the speed they were traveling after colliding with the edge of level geometry. In SPMquake, this would mean that slightly grazing the edge of blocks will preserve your speed throughout the collision, and slingshot you as you slide away from the block.
-- Material friction. The more slicked a surface is, the more speed players can gain from circle jumps off that surface. Modpack makers and modders can add blocks with perfect slickness but these blocks should be made rare unless you want your entire base to be a slick map.
-- Knockback ground boosting. A slight oversight in Q3A amplified by CPMA, players could use plasma or explosions to gain zero friction movement on any surface for a short period of time, and gain an absurd amount of speed by a plasma ground boost (PGB). In SPMquake, this is activated upon receiving knockback from an explosion, and if you time your inputs right you can accelerate yourself quickly.
+- Material friction. The more slicked a surface is, the more speed players can gain from circle jumps off that surface. With a perfectly frictionless block, you conserve all momentum gained from ground acceleration - in other words, you go very, very fast. In CPM DeFRaG this is known as *slick*.
+- Knockback ground boosting. A slight oversight in Q3A amplified by CPMA, players could use plasma or explosions to gain slicked movement on any surface for a short period of time, and gain an absurd amount of speed by a ground boost. In SPMquake, this is activated upon receiving knockback from an explosion, and if you time your inputs right you can accelerate yourself quickly.
 - Ramp jumping. Stairs are treated as 45 degree ramps and will deflect players' velocity by such a ramp if they collide with them. This allows you to gain speed by falling onto a flight of stairs, or perform a trimp jump by hitting the flight of stairs horizontally.
+- Overbounce. A strange bug resulting from how the Q3A physics engine calculates where it should place the player on the ground. In certain circumstances, the interaction of the ground placement code and the velocity clipping code allows you to bounce off the ground after a fall, which either bounces you directly back upwards (a vertical overbounce), or transform your vertical momentum into horizontal momentum (a horizontal overbounce).
+  There is a built-in detector in SPMquake to determine if the player will trigger an overbounce while falling. 
+- Dashing. A mechanic from the CPMA clone WarSow, which allows you to dash in any of the 8 directions specifiable by combinations of +forward, +back, +left, and +right, while also conserving all of your momentum.
 
-SPMquake also gives modpack developers options to help balance the mod for modpacks. In particular:
-- The server configuration is always force-mirrored to the client's, preventing players from changing parameters and essentially cheating.
-- Modpack creators can assign armor item(s) the ability to give players SPMquake physics, gating the movement behind an item.
-- Flexible configuration for hunger-based or general speed caps: Speed is initially uncapped for as long as the player has more than three hunger shanks by default, and bunnyhops at sufficiently great speeds will consume large amounts of player saturation. Once they reach below three hunger shanks, players will face a soft speed cap which drags them to a pre-defined limit. ***(Speed decrease from lack of hunger isn't implemented yet, and I removed the code for hard/soft caps accidentally; this will be added back in soon.)***
+## Mutator System
 
-Lastly, SPMquake brings a few quality of life fixes and additions to the game to improve the bunnyhopping experience:
-- Addition of a toggleable on-screen button indicator showing the relevant movement keys the player is pressing.
-- Disabling the vanilla sprinting mechanic if the movement physics are active for a specific player.
-- Changing the view bobbing math so that it is smoother and less sporatic, like Quake 3. This is only incredibly relevant for running across slicked surfaces.
-- Convertion of server-sided explosion knockback into client-sided knockback. If you have a weapon intended to launch you with explosion knockback expect it to feel much better.
-- Prevents servers from force-setting players velocities to 0 through knockback-related code (in technicality, it adds in the knockback received, inversely proportional to the player's speed). This fixes issues with players receiving damage and immediately losing all their speed and also using Punch bows to gain ridiculous amounts of speed.
+All of these movement mechanics are implemented through the use of *mutators*, inspired by the components of the same name from Unreal Tournament. Mutators are movement components that modify the player's movement physics either unconditionally or conditionally (based on a heirarchical system).
+
+A movement set is a combination of several mutators, which can be decomposed into *overrides*, *bases*, and *passives*.
+
+- **Override** mutators activate when a certain movement input is pressed and/or held down, and act on a player's ground-acceleration, air-acceleration, pre-movement, and post-movement stages. If they specify, they can choose to completely override a movement input, in which any lower-priority mutators will cease to activate in response - hence being called *overrides*.
+  Override mutators are always considered first when processing player input into acceleration.
+- **Base** mutators activate on all movement inputs, and implement how the player should generally accelerate on the ground or in the air. If a higher-priority override mutator overrides a movement input, then the underlying base mutator will not receive that input, and thus not activate. Base mutators are always considered second-in-line, after processing every override.
+- **Passive** mutators do not respond to any movement inputs, but always activate on every physics tick. They are typically used to implement mechanics that do not involve using the movement keys, like wall clipping and overbouncing. Passives are always considered last in the hierarchy of mutators for a movement set.
+
+Through this system, it should be theoretically possible to implement any game's movement physics as long as that game's movement logic follow this general procedure:
+
+- *Physics tick starts*
+- Ground acceleration/air acceleration/water acceleration (player's velocity is changed) **^**
+- Pre-movement logic
+- Movement (player is displaced by velocity, and clipped against the world's blocks) **^^**
+- Post-movement logic
+- *Physics tick ends.* 
+
+**^** Water acceleration isn't accounted for yet (defaults to vanilla movement), eventually this will be fixed if I or someone else implements Quake water movement.
+
+**^^** Note that Minecraft updates at 20 ticks per second, and on each tick the player is moved exactly by their velocity vector. The movement step is not explicitly overridable by mutators. If you need to get around this (for example: performing *n* sub-tick movements and other logic within those sub-ticks), modify the pre-movement step to perform the movement step, and set the player's velocity to 0 at the end so that they are not displaced by the movement step.
