@@ -1,3 +1,11 @@
+## Note on future of the project
+
+Due to the combination of me losing interest in Forge modding, and core modding in general being incredibly arduous on Forge, this project is no longer actively maintained.
+
+I'm otherwise open to the prospect of occasionally contributing code to any future fork of the project.
+
+Note: If you want a different mod that gates the movement behind a full-fledged content tree, a handful of these movement mechanics will eventually be included as a key mechanic in my (actively developed) Fabric mod, [Alchym](https://github.com/deyahruhd/alchym).
+
 SPMquake
 ======
 
