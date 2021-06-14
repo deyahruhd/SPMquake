@@ -1,5 +1,7 @@
 ## Note on future of the project
 
+### **PLEASE READ: THIS IS A FORK OF THE POPULAR MOD SQUAKE. THIS NOTICE IS NOT AN OFFICIAL ANNOUNCEMENT THAT THE ORIGINAL PROJECT, SQUAKE, IS INACTIVE OR ON HIATUS FOR ANY OF THE REASONS OUTLINED BELOW. THIS SECTION PERTAINS ONLY TO THIS FORK, SPMQUAKE, AND DOES NOT REPRESENT THE OPINIONS OF SQUEEK IN ANY WAY.**
+
 Due to the combination of me losing interest in Forge modding, and core modding in general being incredibly arduous on Forge, this project is no longer actively maintained.
 
 I'm otherwise open to the prospect of occasionally contributing code to any future fork of the project.
